@@ -128,3 +128,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+Api/MySuparApp/.vs/
+Api/MySuparApp/bin/
+Api/MySuparApp/obj/

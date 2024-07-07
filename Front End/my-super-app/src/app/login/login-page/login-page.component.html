@@ -1,0 +1,7 @@
+<ng-container *ngIf="showSignIn">
+  <app-sign-in (signInResponse)="onSignInResponse($event)"></app-sign-in>
+</ng-container>
+
+<ng-container *ngIf="showCreateUser">
+  <app-create-user (createUserResponse)="onCreateUserResponse($event)"></app-create-user>
+</ng-container>
