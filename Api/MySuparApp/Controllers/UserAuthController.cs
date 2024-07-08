@@ -23,7 +23,7 @@ public class SignInWithGoogle : ControllerBase
         {
             string jwt = jwtHeaderValue.ToString();
 
-            var returnVal = await UserAuthentication.ReadExcelFile(jwt);
+            var returnVal = await UserAuthentication.AuthenticateUser(jwt);
 
             switch (returnVal.VerificationResult.Status.ToLower())
             {
