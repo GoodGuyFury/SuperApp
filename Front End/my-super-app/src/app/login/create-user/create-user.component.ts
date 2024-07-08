@@ -18,8 +18,6 @@ export class CreateUserComponent implements OnInit {
   constructor(private ngZone: NgZone, private location :Location) { }
 
   ngOnInit() {
-    debugger;
-    // this.location.replaceState("/login/new-user/");
     google.accounts.id.initialize({
       client_id: googleClientId,
       callback:(resp:any)=>{
@@ -43,7 +41,6 @@ export class CreateUserComponent implements OnInit {
   }
 
   goBackToSignIn(){
-    // debugger;
     this.createUserResponse.emit(true);
   }
 }

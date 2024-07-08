@@ -2,6 +2,10 @@
 using System.Threading.Tasks;
 using System.Text.Json;
 using UserAuthController;
+using GoogleSigninTokenVerification;
+using WebConfiguration;
+using UserAuthModel;
+
 namespace AuthMiddlware
 {
     public class AuthHandler:IMiddleware
@@ -11,7 +15,8 @@ namespace AuthMiddlware
         {
             var path = context.Request.Path.ToString().ToLower();
 
-            if (path == "/login" || path== "/signinwithgoogle")
+            // Allow unauthenticated access to specific paths
+            if (path == "/login" || path == "/signinwithgoogle")
             {
                 await next(context);
                 return;
@@ -19,36 +24,59 @@ namespace AuthMiddlware
 
             var token = context.Request.Cookies["token-1"];
 
-            if (string.IsNullOrEmpty(token) )
+            // Check if token is missing
+            if (string.IsNullOrEmpty(token))
             {
+                await HandleUnauthorizedAsync(context, "User needs to authorize");
+                return;
+            }
+
+            // Verify token and get email
+            var data = await GoogleTokenVerifier.VerifyGoogleTokenAndGetEmailAsync(token, WebConfig.GoogleClientId);
+
+            // Check if email is verified
+            if (data.EmailVerified)
+            {
+                var userData = new UserInfo
+                {
+                    FullName = data.Name, // Replace with actual data fetching logic
+                    Email = data.Email  // Replace with actual data fetching logic
+                };
+                context.Items["UserData"] = userData;
+                // Allow access to initialization endpoint
                 if (path == "/appinitialize")
                 {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.ContentType = "application/json";
-                    var response = new { message = "User needs to authorize" };
-                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                    await HandleSuccessAsync(context, "Success");
+                    return;
                 }
-                else
-                {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.ContentType = "application/json";
-                    var response = new { message = "Unauthorized" };
-                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
-                }
+
+                // Allow access to other authenticated endpoints
+                await next(context);
                 return;
             }
-
-            if (path == "/appinitialize")
+            else
             {
-                context.Response.StatusCode = StatusCodes.Status200OK;
-                context.Response.ContentType = "application/json";
-                var response = new { message = "Success" };
-                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                await HandleUnauthorizedAsync(context, "User needs to authorize");
                 return;
             }
-
-            await next(context);
         }
+
+        private async Task HandleUnauthorizedAsync(HttpContext context, string message)
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+            var response = new { message };
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        }
+
+        private async Task HandleSuccessAsync(HttpContext context, string message)
+        {
+            context.Response.StatusCode = StatusCodes.Status200OK;
+            context.Response.ContentType = "application/json";
+            var response = new { message };
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+        }
+
     }
 }
 

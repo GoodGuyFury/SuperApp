@@ -19,15 +19,16 @@ export class LoginPageComponent implements OnInit {
   constructor(private superservice:SuperServiceService) { }
 
   ngOnInit() {
-    debugger;
     this.appInitializer();
   }
 
   async appInitializer(){
-    debugger
     (await this.superservice.appInitialize()).subscribe({
       next: (data) => {
         console.log(data);
+        if(data.massage.toLowerCase() == "success"){
+
+        }
       }})
   }
 

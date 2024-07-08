@@ -13,10 +13,10 @@ var app = builder.Build();
 
 app.UseCors(builder =>
 {
-    builder.AllowAnyOrigin()
-    //.WithOrigins(WebConfig.AllowedOrigins)
+    builder.WithOrigins(WebConfig.AllowedOrigins)
            .AllowAnyMethod()
-           .AllowAnyHeader();
+           .AllowAnyHeader()
+           .AllowCredentials();
 });
 
 // Configure the HTTP request pipeline.

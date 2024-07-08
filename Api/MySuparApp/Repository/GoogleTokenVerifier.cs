@@ -6,7 +6,7 @@ namespace GoogleSigninTokenVerification
 {
     public class GoogleTokenVerifier
     {
-        public async Task<GoogleUserInfo> VerifyGoogleTokenAndGetEmailAsync(string jwtToken, string expectedClientId)
+        public static async Task<GoogleUserInfo> VerifyGoogleTokenAndGetEmailAsync(string jwtToken, string expectedClientId)
         {
             var result = new GoogleUserInfo();
             try
@@ -23,6 +23,7 @@ namespace GoogleSigninTokenVerification
                 // Extract email from payload
                 result.Email = payload.Email;   
                 result.EmailVerified = payload.EmailVerified;
+                result.Name = payload.Name;
                 result.msg = "Success";
                 //string email = payload.Email;
 

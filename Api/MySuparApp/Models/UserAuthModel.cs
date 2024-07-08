@@ -4,7 +4,10 @@
     {
      public  bool EmailVerified { get; set; } = false;
      public  string Email { get; set; }  =string.Empty;
-        public string msg { get; set; } = string.Empty; 
+        public string Name { get; set; } = string.Empty;
+        public string Picture { get; set; } = string.Empty;
+        public string msg { get; set; } = string.Empty;
+        
     }
     public class VerificationResultDto
     {
@@ -18,7 +21,7 @@
         public  string Role { get; set; } = string.Empty;
 
         public string Message { get; set; } = string.Empty;
-        public string userId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
     }
 }
