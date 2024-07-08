@@ -32,13 +32,13 @@ export class CreateUserComponent implements OnInit {
 
 
     google.accounts.id.renderButton(document.getElementById("google-btn"),{
-      // type: "standard",
+      type: "standard",
       theme: "filled_blue",
       size: "large",
       shape: "rectangle",
-      width: 200,
-      // logo_alignment: "center",
-      // height: "auto",
+      width: 100,
+      logo_alignment: "center",
+      height: "auto",
     })
   }
 

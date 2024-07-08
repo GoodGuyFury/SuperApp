@@ -28,7 +28,7 @@ export class SignInComponent implements OnInit {
         client_id: googleClientId,
         callback:(resp:any)=>{
           this.ngZone.run(() => {
-            this.verifySignin(resp.credential);
+            this.verifyGoogleSignin(resp.credential);
           });
         }
       });
@@ -40,13 +40,13 @@ export class SignInComponent implements OnInit {
       theme: "filled_blue",
       size: "large",
       shape: "rectangle",
-      width: 200,
+      width: 100,
       logo_alignment: "center",
       height: "auto",
     })
   }
 
-  async verifySignin(googleCred: any) {
+  async verifyGoogleSignin(googleCred: any) {
 
     (await this.superservice.signInWithGoogle(googleCred)).subscribe({
       next: (data) => {
