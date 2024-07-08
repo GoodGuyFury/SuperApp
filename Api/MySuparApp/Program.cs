@@ -13,7 +13,8 @@ var app = builder.Build();
 
 app.UseCors(builder =>
 {
-    builder.WithOrigins(WebConfig.AllowedOrigins)
+    builder.AllowAnyOrigin()
+    //.WithOrigins(WebConfig.AllowedOrigins)
            .AllowAnyMethod()
            .AllowAnyHeader();
 });

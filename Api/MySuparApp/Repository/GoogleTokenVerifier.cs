@@ -6,7 +6,7 @@ namespace GoogleSigninTokenVerification
 {
     public class GoogleTokenVerifier
     {
-        public async Task<GoogleUserInfo> VerifyGoogleTokenAndGetEmailAsync(string idToken, string expectedClientId)
+        public async Task<GoogleUserInfo> VerifyGoogleTokenAndGetEmailAsync(string jwtToken, string expectedClientId)
         {
             var result = new GoogleUserInfo();
             try
@@ -18,7 +18,7 @@ namespace GoogleSigninTokenVerification
                 };
 
                 // Verify the token with the validation settings
-                var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, validationSettings);
+                var payload = await GoogleJsonWebSignature.ValidateAsync(jwtToken, validationSettings);
 
                 // Extract email from payload
                 result.Email = payload.Email;   
