@@ -7,15 +7,18 @@ import { environment } from './../enviorment';
   providedIn: 'root',
 })
 export class SuperServiceService {
-  private weatherApiUrl = environment.apiUrl+'SignInWithGoogle';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   signInWithGoogle(jwt : string): Observable<any> {
     const headers = new HttpHeaders().set('googjwt', jwt);
-    return this.http.get<any>(this.weatherApiUrl, { headers : headers});
+    return this.http.get<any>(this.apiUrl+'SignInWithGoogle', { headers : headers, withCredentials:true});
   }
    checkRouteAcess(): boolean{
     return false;
    }
+   appInitialize(): Observable<any> {
+    return this.http.get<any>(this.apiUrl + "appinitialize",{ withCredentials: true });
+  }
 }

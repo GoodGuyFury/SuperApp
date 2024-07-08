@@ -1,19 +1,52 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-namespace MySuparApp
+using System.Text.Json;
+using UserAuthController;
+namespace AuthMiddlware
 {
-    public class AuthMiddlware:IMiddleware
+    public class AuthHandler:IMiddleware
 
     {
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            // Fetch headers and cookies from the request
-            var myHeader = context.Request.Headers["MyCustomHeader"];
-            var myCookie = context.Request.Cookies["myjwt"];
+            var path = context.Request.Path.ToString().ToLower();
 
-            // Perform any verification or additional processing here
+            if (path == "/login" || path== "/signinwithgoogle")
+            {
+                await next(context);
+                return;
+            }
 
-            // Call the next middleware in the pipeline
+            var token = context.Request.Cookies["token-1"];
+
+            if (string.IsNullOrEmpty(token) )
+            {
+                if (path == "/appinitialize")
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
+                    var response = new { message = "User needs to authorize" };
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                }
+                else
+                {
+                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    context.Response.ContentType = "application/json";
+                    var response = new { message = "Unauthorized" };
+                    await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                }
+                return;
+            }
+
+            if (path == "/appinitialize")
+            {
+                context.Response.StatusCode = StatusCodes.Status200OK;
+                context.Response.ContentType = "application/json";
+                var response = new { message = "Success" };
+                await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+                return;
+            }
+
             await next(context);
         }
     }

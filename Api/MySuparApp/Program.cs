@@ -1,4 +1,5 @@
 using WebConfiguration;
+using AuthMiddlware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddTransient<AuthHandler>(); // Register the middleware
 
 var app = builder.Build();
 
@@ -24,7 +25,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-//app.UseMiddleware<AuthMiddlware>();
+app.UseMiddleware<AuthHandler>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
