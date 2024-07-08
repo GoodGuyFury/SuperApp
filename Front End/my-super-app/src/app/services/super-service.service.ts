@@ -13,12 +13,12 @@ export class SuperServiceService {
 
   signInWithGoogle(jwt : string): Observable<any> {
     const headers = new HttpHeaders().set('googjwt', jwt);
-    return this.http.get<any>(this.apiUrl+'SignInWithGoogle', { headers : headers, withCredentials:true});
+    return this.http.get<any>(this.apiUrl+'SignInWithGoogle', { headers : headers});
   }
    checkRouteAcess(): boolean{
     return false;
    }
    appInitialize(): Observable<any> {
-    return this.http.get<any>(this.apiUrl + "appinitialize",{ withCredentials: true });
+    return this.http.get<any>(this.apiUrl + "appinitialize");
   }
 }

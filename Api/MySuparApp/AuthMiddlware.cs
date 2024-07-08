@@ -5,6 +5,7 @@ using UserAuthController;
 using GoogleSigninTokenVerification;
 using WebConfiguration;
 using UserAuthModel;
+using UserDataRepository;
 
 namespace AuthMiddlware
 {
@@ -46,7 +47,7 @@ namespace AuthMiddlware
                 // Allow access to initialization endpoint
                 if (path == "/appinitialize")
                 {
-                    await HandleSuccessAsync(context, "Success");
+                    await HandleSuccessAsync(context, "Success", userData);
                     return;
                 }
 
@@ -69,11 +70,12 @@ namespace AuthMiddlware
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
 
-        private async Task HandleSuccessAsync(HttpContext context, string message)
+        private async Task HandleSuccessAsync(HttpContext context, string message, UserInfo userData)
         {
             context.Response.StatusCode = StatusCodes.Status200OK;
             context.Response.ContentType = "application/json";
-            var response = new { message };
+            userData = GetUserDataRepository.GetUserDetailsFromExcel(userData.Email);
+            var response = new { message, userData };
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
 

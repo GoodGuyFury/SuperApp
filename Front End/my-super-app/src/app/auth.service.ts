@@ -1,6 +1,8 @@
 // auth.service.ts
 
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -8,11 +10,9 @@ import { Injectable } from '@angular/core';
 export class AuthService {
   private isAuthenticated: boolean = false;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  // Simulate login (replace with actual login logic)
   login(username: string, password: string): boolean {
-    // Replace with actual authentication logic
     if (username === 'user' && password === 'password') {
       this.isAuthenticated = true;
       return true;
@@ -22,13 +22,16 @@ export class AuthService {
     }
   }
 
-  // Simulate logout (replace with actual logout logic)
   logout(): void {
     this.isAuthenticated = false;
   }
 
-  // Check if user is authenticated
   isLoggedIn(): boolean {
     return this.isAuthenticated;
+  }
+
+  // Method to check access via API call
+  checkAccess(route: string): Observable<boolean> {
+    return this.http.post<boolean>('/api/check-access', { route });
   }
 }

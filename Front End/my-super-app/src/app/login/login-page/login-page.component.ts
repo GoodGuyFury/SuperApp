@@ -26,8 +26,8 @@ export class LoginPageComponent implements OnInit {
     (await this.superservice.appInitialize()).subscribe({
       next: (data) => {
         console.log(data);
-        if(data.massage.toLowerCase() == "success"){
-
+        if(data.message.toLowerCase() == "success"){
+          this.redirectToLandingPage();
         }
       }})
   }
@@ -40,5 +40,9 @@ export class LoginPageComponent implements OnInit {
   onCreateUserResponse(response: boolean) {
     this.showCreateUser = !response;
     this.showSignIn = response;
+  }
+
+  redirectToLandingPage(){
+    debugger;
   }
 }
