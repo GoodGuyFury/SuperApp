@@ -1,9 +1,9 @@
 import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
-import { SuperServiceService } from '../../services/super-service.service';
 import { googleClientId } from '../../enviorment';
 import { ReactiveFormsModule,FormsModule  } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {Location} from '@angular/common';
+import { LoginLogoutService } from '../services/login-logout.service';
 
 declare var google :any;
 
@@ -18,7 +18,7 @@ export class SignInComponent implements OnInit {
 
   @Output() signInResponse = new EventEmitter<boolean>();
 
-  constructor(private superservice : SuperServiceService, private ngZone: NgZone, private location : Location) { }
+  constructor(private loginLogout : LoginLogoutService, private ngZone: NgZone, private location : Location) { }
 
   userData:any;
 
@@ -48,7 +48,7 @@ export class SignInComponent implements OnInit {
 
   async verifyGoogleSignin(googleCred: any) {
 
-    (await this.superservice.signInWithGoogle(googleCred)).subscribe({
+    (await this.loginLogout.signInWithGoogle(googleCred)).subscribe({
       next: (data) => {
         // Handle the response data here
         if(data.verificationResult.status == "authorized"){
