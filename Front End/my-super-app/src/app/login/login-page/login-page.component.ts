@@ -43,6 +43,6 @@ export class LoginPageComponent implements OnInit {
   }
 
   redirectToLandingPage(){
-    debugger;
+
   }
 }
