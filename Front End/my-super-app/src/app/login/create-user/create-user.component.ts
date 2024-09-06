@@ -1,5 +1,5 @@
 import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
-import { googleClientId } from '../../enviorment';
+import { environment } from '../../../environments/environment';
 import {Location} from '@angular/common';
 
 declare var google :any;
@@ -19,7 +19,7 @@ export class CreateUserComponent implements OnInit {
 
   ngOnInit() {
     google.accounts.id.initialize({
-      client_id: googleClientId,
+      client_id: environment.googleClientId,
       callback:(resp:any)=>{
         this.ngZone.run(() => {
         });

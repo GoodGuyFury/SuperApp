@@ -1,5 +1,6 @@
-import { Component, EventEmitter, NgZone, OnInit, Output } from '@angular/core';
-import { googleClientId } from '../../enviorment';
+import { Component, EventEmitter, NgZone, OnInit, Output, Inject, PLATFORM_ID, AfterViewInit } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
 import { ReactiveFormsModule,FormsModule  } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {Location} from '@angular/common';

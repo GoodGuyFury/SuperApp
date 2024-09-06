@@ -3,6 +3,7 @@ import { SignInComponent } from '../sign-in-google/sign-in.component';
 import { CreateUserComponent } from '../create-user/create-user.component';
 import { NgIf } from '@angular/common';
 import { SuperServiceService } from '../../services/super-service.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-login-page',
@@ -23,13 +24,15 @@ export class LoginPageComponent implements OnInit {
   }
 
   async appInitializer(){
-    (await this.superservice.appInitialize()).subscribe({
-      next: (data) => {
-        console.log(data);
-        if(data.message.toLowerCase() == "success"){
-          this.redirectToLandingPage();
-        }
-      }})
+    try {
+      const data = await firstValueFrom(this.superservice.appInitialize());
+      if(data.message.toLowerCase() === "success"){
+        this.redirectToLandingPage();
+      }
+    } catch (error) {
+      console.error('Error initializing app:', error);
+      // Handle error (e.g., show error message to user)
+    }
   }
 
   onSignInResponse(response: boolean) {
