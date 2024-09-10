@@ -1,0 +1,19 @@
+.login-container {
+  background-image: url('/assets/login-background.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.google-btn-container {
+  height: 50px;
+  width: 100px;
+  margin: 0;
+
+  ::ng-deep > div {
+    width: 100% !important;
+  }
+
+  > div > div:last-child {
+    display: none;
+  }
+}

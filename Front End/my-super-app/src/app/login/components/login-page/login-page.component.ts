@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SignInComponent } from '../sign-in-google/sign-in.component';
 import { CreateUserComponent } from '../create-user/create-user.component';
 import { NgIf } from '@angular/common';
-import { SuperServiceService } from '../../services/super-service.service';
+import { SuperServiceService } from '../../../services/super-service.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({

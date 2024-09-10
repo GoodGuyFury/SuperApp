@@ -15,9 +15,9 @@ export class CanActivateGuard implements CanActivate {
   }
 }
 
-import { SignInComponent } from './login/sign-in-google/sign-in.component';
-import { CreateUserComponent } from './login/create-user/create-user.component';
-import { LoginPageComponent } from './login/login-page/login-page.component';
+import { SignInComponent } from './login/components/sign-in-google/sign-in.component';
+import { CreateUserComponent } from './login/components/create-user/create-user.component';
+import { LoginPageComponent } from './login/components/login-page/login-page.component';
 import { AdminHomeComponent } from './home-module/components/admin-home/admin-home.component';
 import { GeneralHomeComponent } from './home-module/components/general-home/general-home.component';
 import { AuthGuard } from './auth-guard/auth-guard.service';
