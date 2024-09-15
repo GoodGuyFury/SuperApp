@@ -26,7 +26,7 @@ export class LoginLogoutService {
   }
 
   logout(): Observable<any> {
-    return this.http.post<any>(this.apiUrl + "logout", {}).pipe(
+    return this.http.get<any>(this.apiUrl + "logout").pipe(
       tap(() => this.authService.clearAuthData())
     );
   }

@@ -17,7 +17,7 @@ namespace AuthMiddlware
             var path = context.Request.Path.ToString().ToLower();
 
             // Allow unauthenticated access to specific paths
-            if (path == "/login" || path == "/signinwithgoogle")
+            if (path == "/login" || path == "/signinwithgoogle" || path == "/logout")
             {
                 await next(context);
                 return;

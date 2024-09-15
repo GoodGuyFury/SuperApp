@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { LoginLogoutService } from '../../services/login-logout.service';
 import { AuthService } from '../../../auth.service';
+// import { LoaderComponent } from '../../../shared-module/components/loader/loader.component';
+import { LoaderService } from '../../../shared-module/services/loader.service';
 
 declare var google: any;
 
@@ -11,7 +13,7 @@ declare var google: any;
   templateUrl: './sign-in.component.html',
   styleUrls: ['./sign-in.component.scss'],
   standalone: true,
-  imports: [/* ... */]
+  imports: []
 })
 export class SignInComponent implements OnInit {
 
@@ -21,7 +23,8 @@ export class SignInComponent implements OnInit {
     private loginLogoutService: LoginLogoutService,
     private authService: AuthService,
     private router: Router,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private loaderService: LoaderService
   ) { }
 
   userData: any;
@@ -56,6 +59,7 @@ export class SignInComponent implements OnInit {
   }
 
   async verifyGoogleSignin(googleCred: any) {
+    this.loaderService.show();
     this.loginLogoutService.signInWithGoogle(googleCred).subscribe({
       next: (data) => {
         if (data.verificationResult.status === "authorized") {

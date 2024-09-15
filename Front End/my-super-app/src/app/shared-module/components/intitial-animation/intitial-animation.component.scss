@@ -1,13 +1,14 @@
-.animation-container {
-  position: fixed;
-  bottom: 0; /* Start from the bottom */
-  left: 0;
-  width: 100%;
-  height: 100px; /* Adjust height as needed */
-  background-color: #f5f5f5; /* Background color for the animation */
+.animated-text-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Ensure content doesn’t overflow */
-  z-index: 1000; /* Ensure it appears above other content */
+  height: 100vh;
+}
+
+.welcome-message {
+  font-size: 3rem;
+  color: #4A90E2;  // Customize the color as needed
+  font-weight: bold;
+  text-align: center;
+  /* Additional styles if needed */
 }
