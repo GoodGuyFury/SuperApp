@@ -1,19 +1,29 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Location } from '@angular/common';
 import { HeaderComponent } from '../header/header.component';
 import { SideNavComponent } from "../side-nav/side-nav.component";
 import { LoginLogoutService } from '../../../auth-module/services/login-logout.service';
+import { AdminHomeComponent } from '../admin-tab/admin-home.component';
+import { CommonModule } from '@angular/common';
+import { DashboardComponent } from '../dashboard/dashboard.component';
 
 @Component({
   selector: 'app-general-home',
   standalone: true,
-  imports: [HeaderComponent, SideNavComponent],
+  imports: [HeaderComponent, SideNavComponent,AdminHomeComponent,CommonModule,DashboardComponent],
   templateUrl: './general-home.component.html',
-  styleUrl: './general-home.component.scss'
+  styleUrls: ['./general-home.component.scss']
 })
-export class GeneralHomeComponent {
+export class GeneralHomeComponent implements OnInit {
   isSidenavOpen = false;
+  currentTab = 'dashboard';
 
-  constructor(private loginLogoutService: LoginLogoutService) {}
+  constructor(private loginLogoutService: LoginLogoutService, private location: Location) {}
+
+  ngOnInit() {
+    // Set the initial URL to /home/dashboard
+    this.location.go('/home/dashboard');
+  }
 
   toggleSidenav() {
     this.isSidenavOpen = !this.isSidenavOpen;
@@ -31,5 +41,10 @@ export class GeneralHomeComponent {
         window.location.reload();
       }
     });
+  }
+
+  onTabChange(tab: string) {
+    this.currentTab = tab;
+    this.location.go(`/home/${tab}`);
   }
 }

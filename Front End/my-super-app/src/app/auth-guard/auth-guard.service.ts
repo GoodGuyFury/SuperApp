@@ -19,6 +19,7 @@ export class AuthGuard implements CanActivate {
     const requestedUrl = state.url;
 
     // If user tries to access an admin route
+
     if (requestedUrl.startsWith('/admin')) {
       if (userRole?.toLowerCase() === 'admin') {
         return true; // Admin is allowed
