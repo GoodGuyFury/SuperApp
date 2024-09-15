@@ -1,11 +1,12 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { LoginLogoutService } from '../../../auth-module/services/login-logout.service';
 import { Router } from '@angular/router';
 import { LoaderService } from '../../services/loader.service';
 import { firstValueFrom } from 'rxjs';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { Route, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-intitial-animation',
@@ -13,7 +14,7 @@ import { Route, RouterModule } from '@angular/router';
   templateUrl: './intitial-animation.component.html',
   styleUrls: ['./intitial-animation.component.scss'],
   providers: [provideAnimations()],
-  imports: [RouterModule],
+  imports: [RouterModule,CommonModule ],
   animations: [
     trigger('welcomeAnimation', [
       state('visible', style({
@@ -35,43 +36,76 @@ import { Route, RouterModule } from '@angular/router';
   ]
 })
 export class IntitialAnimationComponent {
+  @Output() animationComplete = new EventEmitter<void>();
+  animationState = 'visible'; // Initially visible
+  minAnimationDuration = 1000; // Minimum animation duration (in milliseconds)
+  apiCallComplete = false;
+  animationStarted = false;
+
   constructor(
     private loginLogoutService: LoginLogoutService,
     private router: Router,
     private loaderService: LoaderService
-  ) { }
-  @Output() animationComplete = new EventEmitter<void>();
-  animationState = 'visible';
+  ) {}
 
   ngOnInit() {
-    this.initializeComponent();
-    setTimeout(() => {
-      this.animationState = 'hidden'; // Start the animation to make the message fall down
-    }, 2000); // Show the welcome message for 1 second
-
-    setTimeout(() => {
-      this.animationComplete.emit(); // Notify the parent component when the animation is complete
-    }, 2500); // Delay to complete the animation before triggering the event
-
+    if (!this.animationStarted) {
+      this.startImmediateAnimation();
+      this.animationStarted = true;
+    }
+    const animationStartTime = Date.now(); // Record when the animation starts
+    this.initializeComponent(animationStartTime);
   }
 
-  async initializeComponent() {
-    this.loaderService.show();
+  startImmediateAnimation() {
+    this.animationState = 'visible';
+  }
+
+  async initializeComponent(animationStartTime: number) {
+    this.loaderService.show(); // Show loader as API call starts
+
     try {
       const data = await firstValueFrom(this.loginLogoutService.appInitialize());
-      if (data.verificationResult.status.toLowerCase() === "authorized") {
-        this.router.navigate(['/home']);
-      } else {
-        this.router.navigate(['/authentication']);
 
+      this.apiCallComplete = true; // Mark API call as complete
+
+      const elapsedTime = Date.now() - animationStartTime; // Calculate time spent
+      const remainingTime = this.minAnimationDuration - elapsedTime;
+
+      if (remainingTime > 0) {
+        setTimeout(() => this.hideAnimationAndNavigate(data), remainingTime);
+      } else {
+        this.hideAnimationAndNavigate(data);
       }
     } catch (error) {
-      this.router.navigate(['/authentication']);
+      this.apiCallComplete = true;
       console.error('Error initializing app:', error);
-      // Handle error (e.g., show error message to user)
+
+      const elapsedTime = Date.now() - animationStartTime;
+      const remainingTime = this.minAnimationDuration - elapsedTime;
+
+      if (remainingTime > 0) {
+        setTimeout(() => this.hideAnimationAndNavigate({ verificationResult: { status: 'unauthorized' } }), remainingTime);
+      } else {
+        this.hideAnimationAndNavigate({ verificationResult: { status: 'unauthorized' } });
+      }
     } finally {
       this.loaderService.hide();
     }
   }
 
+  hideAnimationAndNavigate(data: any) {
+    this.animationState = 'hidden'; // Start hiding the animation
+
+    setTimeout(() => {
+      this.animationComplete.emit(); // Notify the AppComponent that animation is done
+
+      // Navigate only after the animation is fully hidden
+      if (data.verificationResult.status.toLowerCase() === "authorized") {
+        this.router.navigate(['/home']);
+      } else {
+        this.router.navigate(['/authentication']);
+      }
+    }, 500); // Wait for 1 second to finish the hiding animation
+  }
 }

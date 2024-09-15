@@ -1,0 +1,11 @@
+/* Minimal styles to prevent black screen or unstyled content flashes */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #fff; /* Ensure background is white to prevent black flashes */
+}
+
+app-root {
+  display: block; /* Ensure root component displays correctly */
+}

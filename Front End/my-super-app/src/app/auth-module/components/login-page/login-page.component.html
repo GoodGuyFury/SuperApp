@@ -1,15 +1,7 @@
-<ng-container *ngIf="isInitialized && isAnimationComplete; else loading">
-  <ng-container *ngIf="showSignIn">
+ <ng-container *ngIf="showSignIn">
     <app-sign-in (signInResponse)="onSignInResponse($event)"></app-sign-in>
   </ng-container>
 
   <ng-container *ngIf="showCreateUser">
     <app-create-user (createUserResponse)="onCreateUserResponse($event)"></app-create-user>
   </ng-container>
-
-  <!-- Rest of your login page template -->
-</ng-container>
-
-<ng-template #loading>
-  <app-intitial-animation (animationComplete)="onAnimationComplete()"></app-intitial-animation>
-</ng-template>

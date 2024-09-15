@@ -30,26 +30,7 @@ export class LoginPageComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.initializeComponent();
-  }
-
-  async initializeComponent() {
-    this.loaderService.show();
-    try {
-      const data = await firstValueFrom(this.loginLogoutService.appInitialize());
-      if (data.verificationResult.status.toLowerCase() === "authorized") {
-        this.router.navigate(['/home']);
-      } else {
-      }
-    } catch (error) {
-      console.error('Error initializing app:', error);
-      // Handle error (e.g., show error message to user)
-    } finally {
-      this.loaderService.hide();
-      this.showSignIn = true; // or false, depending on your logic
-      this.showCreateUser = false; // or true, depending on your logic
-      this.isInitialized = true;
-    }
+    debugger;
   }
 
   onSignInResponse(response: boolean) {
