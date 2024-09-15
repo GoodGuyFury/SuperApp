@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
+import { Router } from '@angular/router';
 import { HeaderComponent } from '../header/header.component';
 import { SideNavComponent } from "../side-nav/side-nav.component";
 import { LoginLogoutService } from '../../../auth-module/services/login-logout.service';
@@ -18,7 +19,7 @@ export class GeneralHomeComponent implements OnInit {
   isSidenavOpen = false;
   currentTab = 'dashboard';
 
-  constructor(private loginLogoutService: LoginLogoutService, private location: Location) {}
+  constructor(private loginLogoutService: LoginLogoutService, private location: Location, private router: Router) {}
 
   ngOnInit() {
     // Set the initial URL to /home/dashboard
@@ -33,12 +34,12 @@ export class GeneralHomeComponent implements OnInit {
     this.loginLogoutService.logout().subscribe({
       next: () => {
         console.log('Logged out successfully');
-        window.location.reload();
-        // Implement redirect to login page or other post-logout logic
+        this.router.navigate(['/login']);
       },
       error: (error) => {
         console.error('Logout failed', error);
-        window.location.reload();
+        // Optionally, you can still navigate to login on error
+        this.router.navigate(['/login']);
       }
     });
   }

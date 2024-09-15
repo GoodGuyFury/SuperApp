@@ -1,2 +1,4 @@
-<app-intitial-animation *ngIf="!showRouterOutlet" (animationComplete)="onAnimationComplete()"></app-intitial-animation>
-<router-outlet *ngIf="showRouterOutlet"></router-outlet>
+<div *ngIf="isLoading" class="loader-overlay">
+  <mat-spinner></mat-spinner>
+</div>
+<router-outlet></router-outlet>

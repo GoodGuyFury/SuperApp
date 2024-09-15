@@ -1,27 +1,47 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
-import { IntitialAnimationComponent } from "./shared-module/components/intitial-animation/intitial-animation.component";
+import { LoginLogoutService } from './auth-module/services/login-logout.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, IntitialAnimationComponent,CommonModule],
+  imports: [RouterOutlet, MatProgressSpinnerModule, CommonModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   title = 'my-super-app';
-  showRouterOutlet = false; // Control the visibility of the router outlet
-  animationComplete$ = new BehaviorSubject<boolean>(false); // Observable to emit animation completion
+  isLoading = false;
 
-  constructor(private router: Router) {}
+  constructor(
+    private loginLogoutService: LoginLogoutService,
+    private router: Router
+  ) {}
 
-  // Method to be called by IntitialAnimationComponent when animation completes
-  onAnimationComplete() {
-    this.showRouterOutlet = true;
-    this.animationComplete$.next(true);
+  ngOnInit() {
+    this.appInitialize();
+  }
+
+  appInitialize() {
+    console.log('App initializing');
+    this.isLoading = true;
+    this.loginLogoutService.appInitialize().subscribe({
+      next: (response) => {
+        if (response.verificationResult.status == 'authorized') {
+          this.router.navigate(['/home']);
+        } else {
+          this.router.navigate(['/authentication']);
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('App initialization failed:', err);
+        this.router.navigate(['/authentication']);
+        this.isLoading = false;
+      }
+    });
   }
 }
 

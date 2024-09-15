@@ -1,4 +1,4 @@
-<app-header (toggleSidenav)="toggleSidenav()"></app-header>
+<app-header (toggleSidenav)="toggleSidenav()" (logout)="logout()"></app-header>
 <app-side-nav [isOpen]="isSidenavOpen" [currentTab]="currentTab" (tabChange)="onTabChange($event)">
   <div class="main-content">
     <ng-container [ngSwitch]="currentTab">
