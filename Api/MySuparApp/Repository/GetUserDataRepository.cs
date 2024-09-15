@@ -1,5 +1,5 @@
 ﻿using OfficeOpenXml;
-using UserAuthModel;
+using userAuthModel;
 
 namespace UserDataRepository
 {
@@ -24,11 +24,11 @@ namespace UserDataRepository
                         {
                             var userDetails = new UserInfo
                             {
-                                FullName = worksheet.Cells[row, 3].Text,
-                                Role = worksheet.Cells[row, 5].Text,
-                                UserId = worksheet.Cells[row, 1].Text,
-                                Message = worksheet.Cells[row, 4].Text,
-                                Email = worksheet.Cells[row, 2].Text
+                                fullName = worksheet.Cells[row, 3].Text,
+                                role = worksheet.Cells[row, 5].Text,
+                                userId = worksheet.Cells[row, 1].Text,
+                                message = worksheet.Cells[row, 4].Text,
+                                email = worksheet.Cells[row, 2].Text
                             };
 
                             return userDetails;
@@ -41,7 +41,11 @@ namespace UserDataRepository
                 throw new Exception("Error reading Excel file", ex);
             }
 
-            return null; // Return null if user details not found
+            return new UserInfo
+            {
+                message = "User not found",
+                email = UserEmail
+            }; // Return null if user details not found
         }
     }
 }

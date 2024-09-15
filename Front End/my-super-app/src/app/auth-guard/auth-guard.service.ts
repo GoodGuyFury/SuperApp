@@ -1,34 +1,39 @@
 // auth-guard.service.ts
 
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, Router } from '@angular/router';
+import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
-
   constructor(private authService: AuthService, private router: Router) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean {
-    debugger;
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+      this.router.navigate(['/login']);
       return false;
     }
 
-    const url: string = state.url;
-    return this.authService.checkAccess(url).pipe(
-      map(hasAccess => {
-        if (!hasAccess) {
-          this.router.navigate(['/access-denied']); // Redirect to an access denied page
-          return false;
-        }
+    const userRole = this.authService.getUserRole();
+    const requestedUrl = state.url;
+
+    if (requestedUrl.startsWith('/admin')) {
+      if (userRole?.toLowerCase() === 'admin') {
         return true;
-      })
-    );
+      } else {
+        this.router.navigate(['/home']);
+        return false;
+      }
+    }
+
+    if (requestedUrl === '/home') {
+      return true; // Both admin and regular members can access the home page
+    }
+
+    // For any other routes, redirect to home
+    this.router.navigate(['/home']);
+    return false;
   }
 }

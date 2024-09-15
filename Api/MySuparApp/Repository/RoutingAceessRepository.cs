@@ -1,4 +1,4 @@
-﻿using UserAuthModel;
+﻿using userAuthModel;
 using UserAuthRepository;
 
 namespace RoutingAccessRepository

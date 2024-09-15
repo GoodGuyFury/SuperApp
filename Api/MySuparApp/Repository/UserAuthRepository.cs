@@ -3,24 +3,13 @@ using OfficeOpenXml;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using UserAuthModel;
+using userAuthModel;
 using GoogleSigninTokenVerification;
 using WebConfiguration;
 using UserDataRepository;
 
 namespace UserAuthRepository
 {
-    public class AuthenticationResult
-    {
-        public VerificationResultDto VerificationResult { get; set; }
-        public UserInfo? UserInfo { get; set; }
-
-        public AuthenticationResult()
-        {
-            VerificationResult = new VerificationResultDto();
-        }
-    }
-
     public class UserAuthentication
     {
         public async static Task<AuthenticationResult> AuthenticateUser(string jwt)
@@ -31,32 +20,32 @@ namespace UserAuthRepository
             {
                 var Id = await GoogleTokenVerifier.VerifyGoogleTokenAndGetEmailAsync(jwt, WebConfig.GoogleClientId);
 
-                if (Id.EmailVerified)
+                if (Id.emailVerified)
                 {
-                    var userDetails =  GetUserDataRepository.GetUserDetailsFromExcel(Id.Email);
+                    var userDetails =  GetUserDataRepository.GetUserDetailsFromExcel(Id.email);
 
                     if (userDetails != null)
                     {
-                        result.UserInfo = userDetails;
-                        result.VerificationResult.Status = "authorized";
-                        result.VerificationResult.Message = "Successful";
+                        result.userInfo = userDetails;
+                        result.verificationResult.status = "authorized";
+                        result.verificationResult.message = "Successful";
                     }
                     else
                     {
-                        result.VerificationResult.Status = "unauthorized";
-                        result.VerificationResult.Message = "Authorization failed";
+                        result.verificationResult.status = "unauthorized";
+                        result.verificationResult.message = "Authorization failed";
                     }
                 }
                 else
                 {
-                    result.VerificationResult.Status = "error";
-                    result.VerificationResult.Message = Id.msg;
+                    result.verificationResult.status = "error";
+                    result.verificationResult.message = Id.msg;
                 }
             }
             catch (Exception ex)
             {
-                result.VerificationResult.Status = "error";
-                result.VerificationResult.Message = ex.Message;
+                result.verificationResult.status = "error";
+                result.verificationResult.message = ex.Message;
             }
 
             return result;
@@ -68,10 +57,10 @@ namespace UserAuthRepository
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, // if you want the cookie to be sent only over HTTPS
-                Expires = DateTimeOffset.Now.AddDays(1),
-                // Path = "/", // the path for which the cookie is valid
-                // Domain = "yourdomain.com" // the domain for which the cookie is valid
+                Secure = true,
+                Expires = DateTimeOffset.Now.AddHours(1), // Adjust as needed
+                Path = "/",
+                SameSite = SameSiteMode.None
             };
 
             httpContext.Response.Cookies.Append(CookieName, jwt, cookieOptions);

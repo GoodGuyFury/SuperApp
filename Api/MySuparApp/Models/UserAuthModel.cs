@@ -1,28 +1,38 @@
-﻿namespace UserAuthModel
+﻿namespace userAuthModel
 {
     public class GoogleUserInfo
     {
-     public  bool EmailVerified { get; set; } = false;
-     public  string Email { get; set; }  =string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Picture { get; set; } = string.Empty;
+        public bool emailVerified { get; set; } = false;
+        public string email { get; set; } = string.Empty;
+        public string name { get; set; } = string.Empty;
+        public string picture { get; set; } = string.Empty;
         public string msg { get; set; } = string.Empty;
-        
     }
+
     public class VerificationResultDto
     {
-        public  string Status { get; set; } = "error";
-        public  string Message { get; set; }= "Failed to authenticate";
-
+        public string status { get; set; } = "error";
+        public string message { get; set; } = "Failed to authenticate";
     }
+
     public class UserInfo
     {
-        public  string FullName { get; set; } = string.Empty;
-        public  string Role { get; set; } = string.Empty;
+        public string fullName { get; set; } = string.Empty;
+        public string role { get; set; } = string.Empty;
+        public string message { get; set; } = string.Empty;
+        public string userId { get; set; } = string.Empty;
+        public string email { get; set; } = string.Empty;
+    }
 
-        public string Message { get; set; } = string.Empty;
-        public string UserId { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
+    public class AuthenticationResult
+    {
+        public VerificationResultDto verificationResult { get; set; }
+        public UserInfo userInfo { get; set; }
+
+        public AuthenticationResult()
+        {
+            verificationResult = new VerificationResultDto();
+            userInfo = new UserInfo();
+        }
     }
 }
-

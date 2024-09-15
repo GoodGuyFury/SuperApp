@@ -1,33 +1,34 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../../environments/environment';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { Location } from '@angular/common';
 import { LoginLogoutService } from '../../services/login-logout.service';
+import { AuthService } from '../../../auth.service';
 
-declare var google :any;
+declare var google: any;
 
 @Component({
   selector: 'app-sign-in',
   templateUrl: './sign-in.component.html',
   styleUrls: ['./sign-in.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, RouterModule]
+  imports: [/* ... */]
 })
 export class SignInComponent implements OnInit {
 
   @Output() signInResponse = new EventEmitter<boolean>();
 
-  constructor(private loginLogout: LoginLogoutService, private ngZone: NgZone, private location: Location, private router: Router) { }
+  constructor(
+    private loginLogoutService: LoginLogoutService,
+    private authService: AuthService,
+    private router: Router,
+    private ngZone: NgZone
+  ) { }
 
   userData: any;
 
   @ViewChild('googleBtn', { static: true }) googleBtn!: ElementRef;
 
   ngOnInit(): void {
-    // Render the Google Sign-In button as soon as the component initializes
     this.renderGoogleSignInButton();
   }
 
@@ -47,7 +48,6 @@ export class SignInComponent implements OnInit {
           theme: 'outline',
           size: 'large',
           width: 100
-          // Set the width to match the container
         }
       );
     } else {
@@ -56,20 +56,10 @@ export class SignInComponent implements OnInit {
   }
 
   async verifyGoogleSignin(googleCred: any) {
-    (await this.loginLogout.signInWithGoogle(googleCred)).subscribe({
+    this.loginLogoutService.signInWithGoogle(googleCred).subscribe({
       next: (data) => {
-        if (data.verificationResult.status == "authorized") {
-          this.userData = data;
-          sessionStorage.setItem("email", this.userData.userInfo.email)
-          sessionStorage.setItem("role", this.userData.userInfo.role)
-
-          // Redirect to home page based on user role
-          debugger
-          if (this.userData.userInfo.role.toLowerCase() === 'admin') {
-            this.router.navigate(['/admin-home']);
-          } else {
-            this.router.navigate(['/general-home']);
-          }
+        if (data.verificationResult.status === "authorized") {
+          this.router.navigate(['/home']);
         }
       },
       error: (error) => {
@@ -80,7 +70,6 @@ export class SignInComponent implements OnInit {
   }
 
   createNewAccount() {
-    // debugger
     this.signInResponse.emit(true);
   }
 }

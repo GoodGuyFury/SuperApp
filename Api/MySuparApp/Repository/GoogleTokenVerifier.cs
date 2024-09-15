@@ -1,6 +1,6 @@
 ﻿using Google.Apis.Auth;
 using Google.Apis.Util;
-using UserAuthModel;
+using userAuthModel;
 
 namespace GoogleSigninTokenVerification
 {
@@ -21,9 +21,9 @@ namespace GoogleSigninTokenVerification
                 var payload = await GoogleJsonWebSignature.ValidateAsync(jwtToken, validationSettings);
 
                 // Extract email from payload
-                result.Email = payload.Email;   
-                result.EmailVerified = payload.EmailVerified;
-                result.Name = payload.Name;
+                result.email = payload.Email;   
+                result.emailVerified = payload.EmailVerified;
+                result.name = payload.Name;
                 result.msg = "Success";
                 //string email = payload.Email;
 
@@ -36,8 +36,8 @@ namespace GoogleSigninTokenVerification
             catch (InvalidJwtException e)
             {
                 // Invalid token or mismatched client ID
-                result.Email = "";
-                result.EmailVerified = false;
+                result.email = "";
+                result.emailVerified = false;
                 result.msg = e.Message;
                 return (result);
             }

@@ -25,7 +25,7 @@ public class SignInWithGoogle : ControllerBase
 
             var returnVal = await UserAuthentication.AuthenticateUser(jwt);
 
-            switch (returnVal.VerificationResult.Status.ToLower())
+            switch (returnVal.verificationResult.status.ToLower())
             {
                 case "authorized":
 

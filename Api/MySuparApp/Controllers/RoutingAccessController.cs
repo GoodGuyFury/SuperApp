@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserAuthController;
-using UserAuthModel;
+using userAuthModel;
 using RoutingAccessRepository;
 
 namespace RoutingAccessController

@@ -4,7 +4,7 @@ using System.Text.Json;
 using UserAuthController;
 using GoogleSigninTokenVerification;
 using WebConfiguration;
-using UserAuthModel;
+using userAuthModel;
 using UserDataRepository;
 
 namespace AuthMiddlware
@@ -36,12 +36,19 @@ namespace AuthMiddlware
             var data = await GoogleTokenVerifier.VerifyGoogleTokenAndGetEmailAsync(token, WebConfig.GoogleClientId);
 
             // Check if email is verified
-            if (data.EmailVerified)
+            if (data.emailVerified)
             {
-                var userData = new UserInfo
+                var userData = new AuthenticationResult
                 {
-                    FullName = data.Name, // Replace with actual data fetching logic
-                    Email = data.Email  // Replace with actual data fetching logic
+                    userInfo = new UserInfo
+                    {
+                        email = data.email ?? string.Empty    // Replace with actual data fetching logic
+                    },
+                    verificationResult = new VerificationResultDto
+                    {
+                        status = "authorized",    // Example value, you can replace this as needed
+                        message = "Successfull" // Example value
+                    }
                 };
                 context.Items["UserData"] = userData;
                 // Allow access to initialization endpoint
@@ -70,14 +77,21 @@ namespace AuthMiddlware
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
 
-        private async Task HandleSuccessAsync(HttpContext context, string message, UserInfo userData)
+        private async Task HandleSuccessAsync(HttpContext context, string message, AuthenticationResult userData)
         {
             context.Response.StatusCode = StatusCodes.Status200OK;
             context.Response.ContentType = "application/json";
-            userData = GetUserDataRepository.GetUserDetailsFromExcel(userData.Email);
-            var response = new { message, userData };
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+
+            var userDetails = GetUserDataRepository.GetUserDetailsFromExcel(userData.userInfo.email);
+            userData.userInfo = userDetails;
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            {
+                userData.verificationResult,
+                userData.userInfo
+            }));
         }
+
 
     }
 }
