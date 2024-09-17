@@ -12,19 +12,25 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent implements OnInit {
   title = 'my-super-app';
-  showAnimation = true;
+  showAnimation = false;
   showRouterOutlet = false;
 
   constructor(private router: Router) {}
 
   ngOnInit() {
-    // The animation will start automatically when the component is initialized
+    const animationLoaded = sessionStorage.getItem('animationLoaded') === 'true';
+
+    if (animationLoaded) {
+      this.showRouterOutlet = true;
+    } else {
+      this.showAnimation = true;
+    }
   }
 
   onAnimationComplete() {
     this.showAnimation = false;
     this.showRouterOutlet = true;
-    // Navigate to the authentication route after animation
+    sessionStorage.setItem('animationLoaded', 'true');
     this.router.navigate(['/authentication']);
   }
 }

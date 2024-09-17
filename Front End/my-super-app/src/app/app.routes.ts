@@ -8,15 +8,6 @@ import { AdminHomeComponent } from './components/home-module/components/admin-ta
 export const routes: Routes = [
   { path: '', redirectTo: '/authentication', pathMatch: 'full' },
   { path: 'authentication', component: LoginPageComponent },
-  {
-    path: 'home',
-    component: GeneralHomeComponent,
-    canActivate: [AuthGuard],
-    children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'admin', component: AdminHomeComponent }
-    ]
-  },
+  { path: 'home', component: GeneralHomeComponent, canActivate: [AuthGuard] },
   { path: '**', redirectTo: '/authentication' } // Catch-all route
 ];

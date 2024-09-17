@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { HeaderComponent } from '../header/header.component';
 import { SideNavComponent } from "../side-nav/side-nav.component";
@@ -10,11 +10,12 @@ import { DashboardComponent } from '../dashboard/dashboard.component';
 @Component({
   selector: 'app-general-home',
   standalone: true,
-  imports: [HeaderComponent, SideNavComponent,AdminHomeComponent,CommonModule,DashboardComponent],
+  imports: [HeaderComponent, SideNavComponent, AdminHomeComponent, CommonModule, DashboardComponent],
   templateUrl: './general-home.component.html',
   styleUrls: ['./general-home.component.scss']
 })
 export class GeneralHomeComponent implements OnInit {
+  @ViewChild(SideNavComponent) sideNav!: SideNavComponent;
   isSidenavOpen = false;
   currentTab = 'dashboard';
 
@@ -46,5 +47,7 @@ export class GeneralHomeComponent implements OnInit {
   onTabChange(tab: string) {
     this.currentTab = tab;
     this.location.go(`/home/${tab}`);
+    // Optionally close the sidenav after tab change
+    // this.sideNav.sidenav.close();
   }
 }

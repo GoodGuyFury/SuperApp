@@ -1,7 +1,5 @@
- <ng-container *ngIf="showSignIn">
-    <app-sign-in (signInResponse)="onSignInResponse($event)"></app-sign-in>
-  </ng-container>
-
-  <ng-container *ngIf="showCreateUser">
-    <app-create-user (createUserResponse)="onCreateUserResponse($event)"></app-create-user>
+ <ng-container *ngIf="isInitialized">
+    <!-- Your existing login page content -->
+    <app-sign-in *ngIf="showSignIn" (signInResponse)="onSignInResponse($event)"></app-sign-in>
+    <app-create-user *ngIf="showCreateUser" (createUserResponse)="onCreateUserResponse($event)"></app-create-user>
   </ng-container>

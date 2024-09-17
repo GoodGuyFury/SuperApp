@@ -16,7 +16,7 @@ import { AuthService } from '../../../../auth.service';
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss'],
   standalone: true,
-  imports: [SignInComponent, CreateUserComponent, NgIf,IntitialAnimationComponent],
+  imports: [SignInComponent, CreateUserComponent, NgIf, IntitialAnimationComponent],
   providers: [provideAnimations()]
 })
 export class LoginPageComponent implements OnInit {
@@ -32,21 +32,26 @@ export class LoginPageComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    try {
-      const response = await firstValueFrom(this.loginLogoutService.appInitialize());
-      this.handleAuthResponse(response);
-    } catch (error) {
-      console.error('Error during app initialization:', error);
-      // Handle any errors that occur during initialization
+    if (this.authService.getJustLoggedOut()) {
+      this.isInitialized = true;
+    }
+    else{
+      try {
+        await firstValueFrom(this.loginLogoutService.appInitialize());
+        this.checkAuthAndRedirect();
+      } catch (error) {
+        console.error('Error during app initialization:', error);
+        this.isInitialized = true; // Show login page on error
+      }
     }
   }
 
-  private handleAuthResponse(response: any) {
-    this.authService.handleAuthResponse(response);
+  private checkAuthAndRedirect() {
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/home']);
+    } else {
+      this.isInitialized = true; // Show login page if not authenticated
     }
-    // If not authenticated, stay on the current page (login page)
   }
 
   onSignInResponse(response: boolean) {
@@ -57,9 +62,5 @@ export class LoginPageComponent implements OnInit {
   onCreateUserResponse(response: boolean) {
     this.showCreateUser = !response;
     this.showSignIn = response;
-  }
-  isAnimationComplete: boolean = false;
-  onAnimationComplete() {
-    this.isAnimationComplete = true; // After animation, switch to showing login form
   }
 }

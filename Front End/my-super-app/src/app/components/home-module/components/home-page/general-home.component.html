@@ -1,11 +1,13 @@
 <app-header (toggleSidenav)="toggleSidenav()"></app-header>
-<app-side-nav [isOpen]="isSidenavOpen" [currentTab]="currentTab" (tabChange)="onTabChange($event)">
+<app-side-nav
+  [isOpen]="isSidenavOpen"
+  [currentTab]="currentTab"
+  (tabChange)="onTabChange($event)">
   <div class="main-content">
     <ng-container [ngSwitch]="currentTab">
       <app-dashboard *ngSwitchCase="'dashboard'"></app-dashboard>
       <app-admin-home *ngSwitchCase="'admin'"></app-admin-home>
-      <!-- <app-profile *ngSwitchCase="'profile'"></app-profile>
-      <app-settings *ngSwitchCase="'settings'"></app-settings> -->
+      <!-- Add other tab components as needed -->
     </ng-container>
   </div>
 </app-side-nav>

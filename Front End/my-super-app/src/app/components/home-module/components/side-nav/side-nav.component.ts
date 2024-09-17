@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { MatSidenav } from '@angular/material/sidenav';
 import { Location } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -15,22 +16,24 @@ import { AuthService } from '../../../../auth.service';
   styleUrls: ['./side-nav.component.scss']
 })
 export class SideNavComponent {
+  @ViewChild('sidenav') sidenav!: MatSidenav;
   @Input() isOpen = false;
   @Input() currentTab = 'dashboard';
   @Output() tabChange = new EventEmitter<string>();
 
   constructor(private location: Location, public authService: AuthService) {}
 
-  changeTab(tab: string) {
+  onNavItemClick(tab: string) {
+    this.changeTab(tab);
     this.tabChange.emit(tab);
+  }
 
-    // Update URL without navigating
-    const url = `/home/${tab}`;
-    this.location.go(url);
+  changeTab(tab: string) {
+    this.currentTab = tab;
+    // Add any additional logic for changing tabs
   }
 
   isAdmin(): boolean {
-    // Implement your admin check logic here
-    return true; // Placeholder return value
+    return this.authService.isAdmin();
   }
 }
