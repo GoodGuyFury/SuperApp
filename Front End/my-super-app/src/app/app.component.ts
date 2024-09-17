@@ -1,47 +1,27 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { LoginLogoutService } from './auth-module/services/login-logout.service';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BehaviorSubject } from 'rxjs';
+import { IntitialAnimationComponent } from "./shared-module/components/intitial-animation/intitial-animation.component";
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MatProgressSpinnerModule, CommonModule],
+  imports: [RouterOutlet, IntitialAnimationComponent,CommonModule],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrl: './app.component.scss'
 })
 export class AppComponent {
   title = 'my-super-app';
-  isLoading = false;
+  showRouterOutlet = false; // Control the visibility of the router outlet
+  animationComplete$ = new BehaviorSubject<boolean>(false); // Observable to emit animation completion
 
-  constructor(
-    private loginLogoutService: LoginLogoutService,
-    private router: Router
-  ) {}
+  constructor(private router: Router) {}
 
-  ngOnInit() {
-    this.appInitialize();
-  }
-
-  appInitialize() {
-    console.log('App initializing');
-    this.isLoading = true;
-    this.loginLogoutService.appInitialize().subscribe({
-      next: (response) => {
-        if (response.verificationResult.status == 'authorized') {
-          this.router.navigate(['/home']);
-        } else {
-          this.router.navigate(['/authentication']);
-        }
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('App initialization failed:', err);
-        this.router.navigate(['/authentication']);
-        this.isLoading = false;
-      }
-    });
+  // Method to be called by IntitialAnimationComponent when animation completes
+  onAnimationComplete() {
+    this.showRouterOutlet = true;
+    this.animationComplete$.next(true);
   }
 }
 
