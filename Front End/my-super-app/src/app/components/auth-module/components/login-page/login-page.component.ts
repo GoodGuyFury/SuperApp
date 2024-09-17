@@ -9,6 +9,7 @@ import { NgIf } from '@angular/common';
 // import { LoaderComponent } from "../../../shared-module/components/loader/loader.component";
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { IntitialAnimationComponent } from '../../../shared-module/components/intitial-animation/intitial-animation.component';
+import { AuthService } from '../../../../auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -26,11 +27,26 @@ export class LoginPageComponent implements OnInit {
   constructor(
     private loginLogoutService: LoginLogoutService,
     private router: Router,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    private authService: AuthService
   ) { }
 
-  ngOnInit() {
-    debugger;
+  async ngOnInit() {
+    try {
+      const response = await firstValueFrom(this.loginLogoutService.appInitialize());
+      this.handleAuthResponse(response);
+    } catch (error) {
+      console.error('Error during app initialization:', error);
+      // Handle any errors that occur during initialization
+    }
+  }
+
+  private handleAuthResponse(response: any) {
+    this.authService.handleAuthResponse(response);
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/home']);
+    }
+    // If not authenticated, stay on the current page (login page)
   }
 
   onSignInResponse(response: boolean) {

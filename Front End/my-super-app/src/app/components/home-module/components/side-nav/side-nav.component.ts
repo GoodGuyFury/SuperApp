@@ -5,7 +5,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../auth.service';
+import { AuthService } from '../../../../auth.service';
 
 @Component({
   selector: 'app-side-nav',

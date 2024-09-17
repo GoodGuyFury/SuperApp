@@ -25,14 +25,14 @@ export class AuthGuard implements CanActivate {
         return true; // Admin is allowed
       } else {
         this.router.navigate(['/home']); // Non-admins are redirected to home
-        return false;
-      }
+      return false;
+    }
     }
 
     // Both admins and regular users can access the home page
     if (requestedUrl === '/home') {
-      return true;
-    }
+    return true;
+  }
 
     // For any other invalid routes, redirect to home
     this.router.navigate(['/home']);

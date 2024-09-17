@@ -1,5 +1,5 @@
 import { Component, EventEmitter, NgZone, OnInit, Output, ViewChild, ElementRef } from '@angular/core';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { Location } from '@angular/common';
 
 declare var google: any;

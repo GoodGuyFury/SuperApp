@@ -1,2 +1,2 @@
-<app-intitial-animation *ngIf="!showRouterOutlet" (animationComplete)="onAnimationComplete()"></app-intitial-animation>
+<app-intitial-animation *ngIf="showAnimation" (animationComplete)="onAnimationComplete()"></app-intitial-animation>
 <router-outlet *ngIf="showRouterOutlet"></router-outlet>

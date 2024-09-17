@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, ElementRef, NgZone, EventEmitter, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 import { LoginLogoutService } from '../../services/login-logout.service';
-import { AuthService } from '../../../auth.service';
+import { AuthService } from '../../../../auth.service';
 // import { LoaderComponent } from '../../../shared-module/components/loader/loader.component';
 import { LoaderService } from '../../../shared-module/services/loader.service';
 

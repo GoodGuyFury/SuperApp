@@ -1,27 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
-import { IntitialAnimationComponent } from "./shared-module/components/intitial-animation/intitial-animation.component";
+import { IntitialAnimationComponent } from "./components/shared-module/components/intitial-animation/intitial-animation.component";
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, IntitialAnimationComponent,CommonModule],
+  imports: [RouterOutlet, IntitialAnimationComponent, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'my-super-app';
-  showRouterOutlet = false; // Control the visibility of the router outlet
-  animationComplete$ = new BehaviorSubject<boolean>(false); // Observable to emit animation completion
+  showAnimation = true;
+  showRouterOutlet = false;
 
   constructor(private router: Router) {}
 
-  // Method to be called by IntitialAnimationComponent when animation completes
+  ngOnInit() {
+    // The animation will start automatically when the component is initialized
+  }
+
   onAnimationComplete() {
+    this.showAnimation = false;
     this.showRouterOutlet = true;
-    this.animationComplete$.next(true);
+    // Navigate to the authentication route after animation
+    this.router.navigate(['/authentication']);
   }
 }
 
