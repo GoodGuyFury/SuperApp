@@ -1,0 +1,14 @@
+:host {
+  display: block;
+  height: 100vh; /* Full viewport height */
+}
+
+/* Background styling */
+.admin-background {
+  background-image: url('../../../../assets/images/eva-lovia-vixen.gif'); /* Path to your image */
+  background-size: cover; /* Ensure the image covers the whole element */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent the image from repeating */
+  height: 100%; /* Full height of the component */
+  width: 100%; /* Full width of the component */
+}

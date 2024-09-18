@@ -1,0 +1,21 @@
+/* header.scss */
+mat-toolbar {
+  height: 50px; /* Adjust the height as needed */
+  background: #03000049; /* Light grey background for the header */
+  display: flex;
+  align-items: center; /* Vertically center the content */
+  padding: 0 16px; /* Optional padding */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.979); /* Optional shadow for the header */
+
+  .example-icon {
+    color: #333; /* Color for the icons */
+  }
+
+  .example-spacer {
+    flex: 1; /* Pushes the remaining items to the ends */
+  }
+
+  .favorite-icon {
+    color: rgba(212, 0, 255, 0.384); /* Color for the favorite icon */
+  }
+}

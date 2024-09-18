@@ -1,5 +1,5 @@
 using WebConfiguration;
-using AuthMiddlware;
+using AuthMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
 

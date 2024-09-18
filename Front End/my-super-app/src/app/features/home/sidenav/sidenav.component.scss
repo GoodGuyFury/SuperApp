@@ -1,0 +1,38 @@
+mat-sidenav-container {
+  display: flex;
+  flex-direction: row; /* Align children horizontally */
+  height: calc(100vh - 50px); /* Adjust height based on header height */
+}
+
+mat-sidenav {
+  width: 250px; /* Width of the sidenav */
+  background: #04c033; /* Background color for the sidenav */
+  padding: 16px; /* Optional padding inside the sidenav */
+  height: 100%; /* Ensure it takes the full height of the container */
+}
+
+mat-sidenav-content {
+  flex: 1; /* Make sure the content takes up the remaining space */
+  padding: 0px; /* Optional padding inside the content */
+  overflow: auto; /* Allows scrolling if content overflows */
+  border: none; /* Remove any border */
+  box-shadow: none; /* Remove any box-shadow */
+}
+
+mat-nav-list {
+  display: flex;
+  flex-direction: column;
+}
+
+mat-list-item {
+  padding: 8px 16px; /* Adjust padding as needed */
+}
+
+mat-list-item a {
+  text-decoration: none; /* Remove underline from links */
+  color: #333; /* Text color for the links */
+}
+
+mat-list-item:hover {
+  background-color: #f0f0f0; /* Background color on hover */
+}

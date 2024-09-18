@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace MySuparApp.Controllers.Authentication
+namespace MySuparApp.Controllers.Logout
 {
     [ApiController]
     [Route("[controller]")]

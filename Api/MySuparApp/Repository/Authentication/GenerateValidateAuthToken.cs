@@ -1,12 +1,11 @@
-﻿namespace MySuparApp.Repository.Authentication
-{
+﻿
     using System;
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Text;
     using Microsoft.IdentityModel.Tokens;
 
-    namespace MySuparApp.Repository.Authentication
+    namespace MySuparApp.Repository.GenerateValidateToken
     {
         public class AuthTokenRepository
         {
@@ -16,7 +15,7 @@
             private const int TokenExpiryInMinutes = 10;
 
             // Method to generate JWT token
-            public string GenerateToken(string email, string name, string role, string username)
+            public static string GenerateToken(string email, string name, string role, string username)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(SecretKey);
@@ -28,7 +27,8 @@
                     new Claim(ClaimTypes.Email, email),
                     new Claim(ClaimTypes.Name, name),
                     new Claim(ClaimTypes.Role, role),
-                    new Claim("Username", username)
+                    new Claim("Username", username),
+                    new Claim("JWTVerified", "true")
                 }),
                     Expires = DateTime.UtcNow.AddMinutes(TokenExpiryInMinutes),
                     Issuer = Issuer, // Include Issuer
@@ -41,7 +41,7 @@
             }
 
             // Method to verify and decode JWT token
-            public ClaimsPrincipal? VerifyToken(string token)
+            public static ClaimsPrincipal? VerifyToken(string token)
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(SecretKey);
@@ -71,4 +71,3 @@
         }
     }
 
-}

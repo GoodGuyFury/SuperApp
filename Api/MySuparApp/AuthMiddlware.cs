@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
-using System.Text.Json;
-using WebConfiguration;
-using MySuparApp.Repository.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using MySuparApp.Models.Authentication;
+using MySuparApp.Repository.GetUserData;
+using MySuparApp.Repository.GenerateValidateToken;
 
-namespace AuthMiddlware
+namespace AuthMiddleware
 {
-    public class AuthHandler:IMiddleware
-
+    public class AuthHandler : IMiddleware
     {
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
@@ -30,42 +31,53 @@ namespace AuthMiddlware
                 return;
             }
 
-            // Verify token and get email
-            var data = await GoogleTokenVerifier.VerifyGoogleTokenAndGetEmailAsync(token, WebConfig.GoogleClientId);
+            // Verify token and get claims
+            var claimsPrincipal = AuthTokenRepository.VerifyToken(token);
 
-
-            // Check if email is verified
-            if (data.emailVerified)
+            // Check if token is valid and claims contain necessary information
+            if (claimsPrincipal != null)
             {
-                var userData = new AuthenticationResult
+                var email = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
+                var username = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
+                var role = claimsPrincipal.FindFirst(ClaimTypes.Role)?.Value;
+                var jwtVerifiedClaim = claimsPrincipal.FindFirst("JWTVerified")?.Value; // Use the correct claim name
+
+
+                bool emailVerified = bool.TryParse(jwtVerifiedClaim, out var isVerified) && isVerified;
+
+                if (emailVerified)
                 {
-                    userInfo = new UserInfo
+                    var userData = new AuthenticationResult
                     {
-                        email = data.email ?? string.Empty    // Replace with actual data fetching logic
-                    },
-                    verificationResult = new VerificationResultDto
+                        userInfo = new UserInfo
+                        {
+                            email = email ?? string.Empty,
+                            userId = username ?? string.Empty,
+                            role = role ?? string.Empty
+                        },
+                        verificationResult = new VerificationResultDto
+                        {
+                            status = "authorized", // Example value, you can adjust as needed
+                            message = "successful" // Example value
+                        }
+                    };
+
+                    context.Items["UserData"] = userData;
+
+                    // Allow access to initialization endpoint
+                    if (path == "/appinitialize")
                     {
-                        status = "authorized",    // Example value, you can replace this as needed
-                        message = "Successfull" // Example value
+                        await HandleSuccessAsync(context, "Success", userData);
+                        return;
                     }
-                };
-                context.Items["UserData"] = userData;
-                // Allow access to initialization endpoint
-                if (path == "/appinitialize")
-                {
-                    await HandleSuccessAsync(context, "Success", userData);
+
+                    // Allow access to other authenticated endpoints
+                    await next(context);
                     return;
                 }
+            }
 
-                // Allow access to other authenticated endpoints
-                await next(context);
-                return;
-            }
-            else
-            {
-                await HandleUnauthorizedAsync(context, "User needs to authorize");
-                return;
-            }
+            await HandleUnauthorizedAsync(context, "User needs to authorize");
         }
 
         private async Task HandleUnauthorizedAsync(HttpContext context, string message)
@@ -81,17 +93,17 @@ namespace AuthMiddlware
             context.Response.StatusCode = StatusCodes.Status200OK;
             context.Response.ContentType = "application/json";
 
+            // Fetch additional user details
             var userDetails = GetUserDataRepository.GetUserDetailsFromExcel(userData.userInfo.email);
             userData.userInfo = userDetails;
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(new
+            var response = new
             {
                 userData.verificationResult,
                 userData.userInfo
-            }));
+            };
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
-
-
     }
 }
-

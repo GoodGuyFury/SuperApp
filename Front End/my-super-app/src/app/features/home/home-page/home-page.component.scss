@@ -1,0 +1,27 @@
+/* Ensure parent container takes full height */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  border: none; /* Remove any border */
+}
+
+:host {
+  display: block;
+  height: 100vh; /* Full viewport height */
+  margin: 0; /* Remove any default margins */
+}
+
+app-header {
+  display: block;
+  width: 100%; /* Full width */
+  height: 50px; /* Fixed height for the header */
+  border: none; /* Remove any border */
+}
+
+app-sidenav {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Takes up the remaining space below the header */
+  border: none; /* Remove any border */
+}

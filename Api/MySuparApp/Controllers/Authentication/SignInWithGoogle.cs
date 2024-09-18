@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using MySuparApp.Repository.Authentication;
+using MySuparApp.Repository.UserAuth;
 
 
 
-namespace MySuparApp.Controllers.Authentication
+namespace MySuparApp.Controllers.SignInWithGoogle
 {
     [ApiController]
     [Route("login")]

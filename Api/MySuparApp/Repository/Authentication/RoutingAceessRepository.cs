@@ -1,6 +1,6 @@
 ﻿using MySuparApp.Models.Authentication;
 
-namespace MySuparApp.Repository.Authentication
+namespace MySuparApp.Repository.RoutingAccess
 {
     public class RoutingAceessRepository
     {

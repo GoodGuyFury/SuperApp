@@ -1,22 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../../enviorments/enviorment';
-
-interface LoginResponse {
-  token: string;
-}
+import { AuthService, AuthResponse } from '../../../core/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class LoginBoxService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) { }
 
-  directLogin(username: string, password: string): Observable<LoginResponse> {
-    debugger;
+  directLogin(username: string, password: string): Observable<AuthResponse> {
     const url = `${this.apiUrl}/login/directlogin`;
 
     const formData = new FormData();
@@ -27,6 +26,8 @@ export class AuthService {
       'Accept': 'application/json'
     });
 
-    return this.http.post<LoginResponse>(url, formData, { headers });
+    return this.http.post<AuthResponse>(url, formData, { headers }).pipe(
+      tap(response => this.authService.handleAuthResponse(response))
+    );
   }
 }

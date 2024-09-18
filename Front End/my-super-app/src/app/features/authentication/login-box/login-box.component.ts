@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { AuthService } from './login-box.service';
+import { LoginBoxService } from './login-box.service';
 
 @Component({
   selector: 'app-login-box',
@@ -15,7 +15,8 @@ export class LoginBoxComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthService
+    private loginBoxService: LoginBoxService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -28,9 +29,9 @@ export class LoginBoxComponent implements OnInit {
   onSubmit() {
     if (this.loginForm.valid) {
       const { username, password } = this.loginForm.value;
-      this.authService.directLogin(username, password).subscribe({
+      this.loginBoxService.directLogin(username, password).subscribe({
         next: (response) => {
-          console.log('Login successful', response);
+          this.router.navigate(['/home/dashboard']);
           // Handle successful login
         },
         error: (error) => {

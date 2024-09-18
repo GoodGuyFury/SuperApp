@@ -1,11 +1,11 @@
 ﻿using MySuparApp.Models.Authentication;
 using OfficeOpenXml;
 
-namespace MySuparApp.Repository.Authentication
+namespace MySuparApp.Repository.GetUserData
 {
     public class GetUserDataRepository
     {
-        public static UserInfo GetUserDetailsFromExcel(string UserEmail)
+        public static UserInfo GetUserDetailsFromExcel(string UserEmail = "", string userId = "", string pass = "")
         {
             try
             {
@@ -16,22 +16,50 @@ namespace MySuparApp.Repository.Authentication
                 {
                     ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
 
-                    for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+                    // Check if email is provided
+                    if (!string.IsNullOrEmpty(UserEmail))
                     {
-                        var cellValue = worksheet.Cells[row, 2].Text;
-
-                        if (cellValue == UserEmail)
+                        for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
                         {
-                            var userDetails = new UserInfo
-                            {
-                                fullName = worksheet.Cells[row, 3].Text,
-                                role = worksheet.Cells[row, 5].Text,
-                                userId = worksheet.Cells[row, 1].Text,
-                                message = worksheet.Cells[row, 4].Text,
-                                email = worksheet.Cells[row, 2].Text
-                            };
+                            var cellValue = worksheet.Cells[row, 2].Text;
 
-                            return userDetails;
+                            if (cellValue == UserEmail)
+                            {
+                                var userDetails = new UserInfo
+                                {
+                                    fullName = worksheet.Cells[row, 3].Text,
+                                    role = worksheet.Cells[row, 5].Text,
+                                    userId = worksheet.Cells[row, 1].Text,
+                                    message = worksheet.Cells[row, 4].Text,
+                                    email = worksheet.Cells[row, 2].Text
+                                };
+
+                                return userDetails;
+                            }
+                        }
+                    }
+
+                    // Check if userId and password are provided
+                    if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(pass))
+                    {
+                        for (int row = 2; row <= worksheet.Dimension.End.Row; row++)
+                        {
+                            var idValue = worksheet.Cells[row, 1].Text;
+                            var passValue = worksheet.Cells[row, 6].Text; // Assuming password is in column F (6th column)
+
+                            if (idValue == userId && passValue == pass)
+                            {
+                                var userDetails = new UserInfo
+                                {
+                                    fullName = worksheet.Cells[row, 3].Text,
+                                    role = worksheet.Cells[row, 5].Text,
+                                    userId = worksheet.Cells[row, 1].Text,
+                                    message = worksheet.Cells[row, 4].Text,
+                                    email = worksheet.Cells[row, 2].Text
+                                };
+
+                                return userDetails;
+                            }
                         }
                     }
                 }
@@ -47,5 +75,6 @@ namespace MySuparApp.Repository.Authentication
                 email = UserEmail
             }; // Return null if user details not found
         }
+
     }
 }
