@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System.Text.Json;
-using UserAuthController;
-using GoogleSigninTokenVerification;
 using WebConfiguration;
-using userAuthModel;
-using UserDataRepository;
+using MySuparApp.Repository.Authentication;
+using MySuparApp.Models.Authentication;
 
 namespace AuthMiddlware
 {
@@ -17,7 +15,7 @@ namespace AuthMiddlware
             var path = context.Request.Path.ToString().ToLower();
 
             // Allow unauthenticated access to specific paths
-            if (path == "/login" || path == "/signinwithgoogle" || path == "/logout")
+            if (path == "/login" || path == "/login/signinwithgoogle" || path == "/logout" || path == "/login/directlogin")
             {
                 await next(context);
                 return;
@@ -34,6 +32,7 @@ namespace AuthMiddlware
 
             // Verify token and get email
             var data = await GoogleTokenVerifier.VerifyGoogleTokenAndGetEmailAsync(token, WebConfig.GoogleClientId);
+
 
             // Check if email is verified
             if (data.emailVerified)

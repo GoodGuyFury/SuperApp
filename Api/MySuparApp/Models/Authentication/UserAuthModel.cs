@@ -1,4 +1,4 @@
-﻿namespace userAuthModel
+﻿namespace MySuparApp.Models.Authentication
 {
     public class GoogleUserInfo
     {

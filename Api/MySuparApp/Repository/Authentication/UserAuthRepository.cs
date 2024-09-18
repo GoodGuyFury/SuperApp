@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
+using MySuparApp.Models.Authentication;
 using OfficeOpenXml;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using userAuthModel;
-using GoogleSigninTokenVerification;
 using WebConfiguration;
-using UserDataRepository;
 
-namespace UserAuthRepository
+namespace MySuparApp.Repository.Authentication
 {
     public class UserAuthentication
     {
@@ -22,7 +20,7 @@ namespace UserAuthRepository
 
                 if (Id.emailVerified)
                 {
-                    var userDetails =  GetUserDataRepository.GetUserDetailsFromExcel(Id.email);
+                    var userDetails = GetUserDataRepository.GetUserDetailsFromExcel(Id.email);
 
                     if (userDetails != null)
                     {

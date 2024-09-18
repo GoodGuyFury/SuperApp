@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UserAuthController;
-using userAuthModel;
-using RoutingAccessRepository;
+using MySuparApp.Controllers.Authentication;
+using MySuparApp.Repository.Authentication;
+using MySuparApp.Models.Authentication;
 
-namespace RoutingAccessController
+namespace MySuparApp.Controllers.Authentication
 {
     public class RoutingController : Controller
     {
@@ -21,10 +21,11 @@ namespace RoutingAccessController
                 if (HttpContext.Items.TryGetValue("UserData", out var userData))
                 {
                     var user = userData as UserInfo; // Ensure UserInfo is used here
-                    if (user != null) {
+                    if (user != null)
+                    {
 
-                        bool access= RoutingAceessRepository.GetAcess(user);
-                         return Ok(access);
+                        bool access = RoutingAceessRepository.GetAcess(user);
+                        return Ok(access);
                     }
                     else
                     {

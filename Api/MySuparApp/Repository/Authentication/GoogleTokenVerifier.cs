@@ -1,8 +1,8 @@
 ﻿using Google.Apis.Auth;
 using Google.Apis.Util;
-using userAuthModel;
+using MySuparApp.Models.Authentication;
 
-namespace GoogleSigninTokenVerification
+namespace MySuparApp.Repository.Authentication
 {
     public class GoogleTokenVerifier
     {
@@ -21,7 +21,7 @@ namespace GoogleSigninTokenVerification
                 var payload = await GoogleJsonWebSignature.ValidateAsync(jwtToken, validationSettings);
 
                 // Extract email from payload
-                result.email = payload.Email;   
+                result.email = payload.Email;
                 result.emailVerified = payload.EmailVerified;
                 result.name = payload.Name;
                 result.msg = "Success";
@@ -39,7 +39,7 @@ namespace GoogleSigninTokenVerification
                 result.email = "";
                 result.emailVerified = false;
                 result.msg = e.Message;
-                return (result);
+                return result;
             }
         }
     }

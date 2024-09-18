@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace UserAuthController
+namespace MySuparApp.Controllers.Authentication
 {
     [ApiController]
     [Route("[controller]")]

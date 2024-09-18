@@ -1,11 +1,11 @@
-﻿using OfficeOpenXml;
-using userAuthModel;
+﻿using MySuparApp.Models.Authentication;
+using OfficeOpenXml;
 
-namespace UserDataRepository
+namespace MySuparApp.Repository.Authentication
 {
     public class GetUserDataRepository
     {
-        public  static UserInfo GetUserDetailsFromExcel(string UserEmail)
+        public static UserInfo GetUserDetailsFromExcel(string UserEmail)
         {
             try
             {
