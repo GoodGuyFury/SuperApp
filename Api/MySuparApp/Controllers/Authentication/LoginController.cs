@@ -8,20 +8,20 @@ namespace MySuparApp.Controllers.Authentication
     [Route("login")]
     public class LoginController : ControllerBase
     {
-        private readonly AuthTokenRepository _authTokenRepository;
+        //private readonly AuthTokenRepository _authTokenRepository;
 
-        public LoginController(AuthTokenRepository authTokenRepository)
-        {
-            _authTokenRepository = authTokenRepository;
-        }
+        //public LoginController(AuthTokenRepository authTokenRepository)
+        //{
+        //    _authTokenRepository = authTokenRepository;
+        //}
 
         [HttpPost("directlogin")]
         public async Task<IActionResult> DirectLogin([FromForm] string username, [FromForm] string password)
         {
             if (username == "admin" && password == "password") // Replace with actual validation logic
             {
-                var token = _authTokenRepository.GenerateToken(username, "Admin User", "ADMIN", username);
-                return Ok(new { Token = token });
+                //var token = _authTokenRepository.GenerateToken(username, "Admin User", "ADMIN", username);
+                //return Ok(new { Token = token });
             }
             return Unauthorized("Invalid username or password.");
         }
