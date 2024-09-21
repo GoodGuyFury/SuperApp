@@ -1,22 +1,24 @@
-﻿using MySuparApp.Models.Authentication;
-using WebConfiguration;
-using MySuparApp.Repository.GetUserData;
+﻿using AppSettingsModel;
+using AuthModel;
+using GetUserDataRepository;
+using GoogleTokenVerifierRepository;
 
-namespace MySuparApp.Repository.UserAuth
+namespace UserAuthRepository
 {
     public class UserAuthentication
     {
+
         public async static Task<AuthenticationResult> AuthenticateUser(string jwt)
         {
             AuthenticationResult result = new AuthenticationResult();
 
             try
             {
-                var Id = await GoogleTokenVerifier.GoogleTokenVerifier.VerifyGoogleTokenAndGetEmailAsync(jwt, WebConfig.GoogleClientId);
+                var Id = await GoogleTokenVerifier.VerifyGoogleTokenAndGetEmailAsync(jwt, GoogleSettings.GoogleClientId);
 
                 if (Id.emailVerified)
                 {
-                    var userDetails = GetUserDataRepository.GetUserDetailsFromExcel(UserEmail: Id.email);
+                    var userDetails = GetUserData.GetUserDetailsFromExcel(UserEmail: Id.email);
 
                     if (userDetails != null)
                     {
@@ -52,7 +54,7 @@ namespace MySuparApp.Repository.UserAuth
             {
                 HttpOnly = true,
                 Secure = true,
-                Expires = DateTimeOffset.Now.AddHours(1), // Adjust as needed
+                Expires = DateTimeOffset.Now.AddHours(2), // Adjust as needed
                 Path = "/",
                 SameSite = SameSiteMode.None
             };

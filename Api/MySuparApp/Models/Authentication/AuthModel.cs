@@ -1,5 +1,16 @@
-﻿namespace MySuparApp.Models.Authentication
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace AuthModel
 {
+  
+    public class UserModel
+    {
+        [Key] public string UserId { get; set; } = string.Empty; // Primary key
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+    }
     public class GoogleUserInfo
     {
         public bool emailVerified { get; set; } = false;
@@ -15,24 +26,15 @@
         public string message { get; set; } = "Failed to authenticate";
     }
 
-    public class UserInfo
-    {
-        public string fullName { get; set; } = string.Empty;
-        public string role { get; set; } = string.Empty;
-        public string message { get; set; } = string.Empty;
-        public string userId { get; set; } = string.Empty;
-        public string email { get; set; } = string.Empty;
-    }
-
     public class AuthenticationResult
     {
         public VerificationResultDto verificationResult { get; set; }
-        public UserInfo userInfo { get; set; }
+        public UserModel userInfo { get; set; }
 
         public AuthenticationResult()
         {
             verificationResult = new VerificationResultDto();
-            userInfo = new UserInfo();
+            userInfo = new UserModel();
         }
     }
 }

@@ -1,11 +1,10 @@
-
 <mat-toolbar>
   <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
     <mat-icon (click)="toggleSidenav()">menu</mat-icon>
   </button>
   <span>Welcome, {{ userName }}</span>
   <span class="example-spacer"></span>
-  <button mat-icon-button class="logout-icon" aria-label="logout">
+  <button mat-icon-button class="logout-icon" aria-label="logout" (click)="logout()"> <!-- Call logout on click -->
     <mat-icon>logout</mat-icon>
   </button>
 </mat-toolbar>

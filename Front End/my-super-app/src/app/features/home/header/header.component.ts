@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { SidenavService } from '../sidenav/sidenav.service';
+import { HeaderService } from './header.service'; // Import HeaderService
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -15,12 +17,17 @@ import { SidenavService } from '../sidenav/sidenav.service';
 export class HeaderComponent implements OnInit {
   userName: string | null = null;
 
-  constructor(private authService: AuthService,private sidenavService: SidenavService) {}
+  constructor(private authService: AuthService, private sidenavService: SidenavService, private headerService: HeaderService) {} // Inject HeaderService
 
   ngOnInit() {
     this.userName = this.authService.getFullName();
   }
+
   toggleSidenav() {
     this.sidenavService.toggle();
+  }
+
+  logout() { // Add logout method
+    this.headerService.logout(); // Call logout method from HeaderService
   }
 }

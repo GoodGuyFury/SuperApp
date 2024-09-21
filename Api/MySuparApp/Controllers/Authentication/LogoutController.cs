@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using AuthTokenRepository;
+using AuthModel;
 
 namespace MySuparApp.Controllers.Logout
 {
@@ -8,34 +10,31 @@ namespace MySuparApp.Controllers.Logout
     public class LogoutController : ControllerBase
     {
         private readonly ILogger<LogoutController> _logger;
+        private readonly AuthToken _authToken; // Non-nullable field
 
-        public LogoutController(ILogger<LogoutController> logger)
+        public LogoutController(ILogger<LogoutController> logger, AuthToken authToken) // Single constructor
         {
             _logger = logger;
+            _authToken = authToken; // Ensure it's not null
         }
 
         [HttpGet(Name = "logout")]
         public IActionResult Logout()
         {
-            // Check if the "token-1" cookie exists
-            if (Request.Cookies.ContainsKey("token-1"))
+            var authRemoved = _authToken.RemoveAuthTokenCookie(Request, Response); // Call the instance method
+            var result = new VerificationResultDto();
+            if (authRemoved)
             {
-                // Remove the cookie by setting it with an expired timestamp
-
-                Response.Cookies.Append("token-1", "", new CookieOptions
-                {
-                    Expires = DateTimeOffset.UtcNow.AddDays(-1),
-                    Secure = true,
-                    Path = "/",
-                    SameSite = SameSiteMode.None
-                });
-
+                result.status = "unathorized";
+                result.message = "Logged Out Succesfully";
                 _logger.LogInformation("User logged out and 'token-1' cookie removed.");
-                return Ok("Logged out successfully.");
+                return Unauthorized(result);
             }
+            result.status = "bad request";
+            result.message = "Logout attempted, but 'token-1' cookie was not found.";
 
             _logger.LogWarning("Logout attempted, but 'token-1' cookie was not found.");
-            return BadRequest("No 'token-1' cookie found.");
+            return BadRequest(result);
         }
     }
 }

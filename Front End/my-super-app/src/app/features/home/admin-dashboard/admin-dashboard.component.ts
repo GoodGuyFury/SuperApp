@@ -1,27 +1,58 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTableModule } from '@angular/material/table';
-import { MatFormField } from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatOption } from '@angular/material/core';
 import { FormsModule, NgModel } from '@angular/forms';
+import { AdminDashboardService } from './admin-dashboard.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { MatListModule } from '@angular/material/list';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatGridListModule } from '@angular/material/grid-list';
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  msg: string;
+  role: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [MatTableModule, MatCardModule, MatToolbarModule, MatIconModule, MatButtonModule,MatFormField,MatInputModule,MatSelect, MatOption, FormsModule],
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatCardModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelect,
+    MatOption,
+    MatListModule,
+    FormsModule,
+    MatAutocompleteModule,MatGridListModule
+  ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
-export class AdminDashboardComponent {
-  users: any[] = [
-    { name: 'John Doe', email: 'john@example.com', role: 'admin', message: 'Welcome', isLocked: false },
-    { name: 'Jane Smith', email: 'jane@example.com', role: 'user', message: 'Hello', isLocked: true },
-    { name: 'Bob Johnson', email: 'bob@example.com', role: 'user', message: 'Hi there', isLocked: false },
-  ];
+export class AdminDashboardComponent implements OnInit{
+
+  searchText: string = '';
+  searchResults: User[] = [];
+  selectedUsers: User[] = [];
+  private searchSubject = new Subject<string>();
+
+  users: any[] = [];
 
   newUser: any = {
     name: '',
@@ -31,26 +62,65 @@ export class AdminDashboardComponent {
     isLocked: false
   };
 
-  editUser(user: any): void {
-    // Implement edit logic
-    console.log('Editing user:', user);
+  constructor(private adminService: AdminDashboardService) { }
+
+  ngOnInit(): void {
+    this.setupSearch();
+  }
+  createUser(){
+
+  }
+  setupSearch(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(searchText => {
+      if (searchText.length >= 3) {
+        this.performSearch(searchText);
+      } else {
+        this.searchResults = [];
+      }
+    });
+  }
+  onSearchChange(searchValue: string): void {
+    this.searchSubject.next(searchValue);
   }
 
-  deleteUser(user: any): void {
-    this.users = this.users.filter(u => u !== user);
+  performSearch(searchText: string): void {
+    this.adminService.fetchUserList(searchText).subscribe({
+      next: (response: User[]) => {
+        this.searchResults = response.filter(user =>
+          !this.selectedUsers.some(selectedUser => selectedUser.id === user.id)
+        );
+      },
+      error: (error) => {
+        console.error('Error searching users:', error);
+      }
+    });
   }
 
-  toggleAccess(user: any): void {
-    user.isLocked = !user.isLocked;
+  selectUser(user: User): void {
+    debugger;
+    this.selectedUsers.push({...user});
+    this.searchResults = this.searchResults.filter(u => u.id !== user.id);
+    this.searchText = '';
   }
 
-  createUser(): void {
-    this.users.push({...this.newUser});
-    this.newUser = {name: '', email: '', role: '', message: '', isLocked: false};
+  saveChanges(): void {
+    // Implement logic to save changes to selected users
+    console.log('Saving changes:', this.selectedUsers);
   }
 
   fetchUserList(): void {
-    // Implement API call to fetch users
-    console.log('Fetching user list');
+    this.adminService.fetchUserList('').subscribe({
+      next: (response) => {
+        this.users = response;
+      },
+      error: (error) => {
+        console.error('Error fetching user list:', error);
+        // Handle error (e.g., show error message to user)
+      }
+    });
   }
+
 }

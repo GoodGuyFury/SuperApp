@@ -1,8 +1,8 @@
 ﻿using Google.Apis.Auth;
 using Google.Apis.Util;
-using MySuparApp.Models.Authentication;
+using AuthModel;
 
-namespace MySuparApp.Repository.GoogleTokenVerifier
+namespace GoogleTokenVerifierRepository
 {
     public class GoogleTokenVerifier
     {

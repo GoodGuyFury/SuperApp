@@ -3,14 +3,23 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using MySuparApp.Models.Authentication;
-using MySuparApp.Repository.GetUserData;
-using MySuparApp.Repository.GenerateValidateToken;
+using AuthModel;
+using GetUserDataRepository;
+using AuthTokenRepository;
+using Microsoft.Extensions.Options;
+using AppSettingsModel;
 
-namespace AuthMiddleware
+namespace AuthMiddlware
 {
     public class AuthHandler : IMiddleware
     {
+        private readonly IOptions<JwtSettings> _jwtSettings;
+
+        // Inject IOptions<JwtSettings> via the constructor
+        public AuthHandler(IOptions<JwtSettings> jwtSettings)
+        {
+            _jwtSettings = jwtSettings;
+        }
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var path = context.Request.Path.ToString().ToLower();
@@ -32,7 +41,8 @@ namespace AuthMiddleware
             }
 
             // Verify token and get claims
-            var claimsPrincipal = AuthTokenRepository.VerifyToken(token);
+            var authToken = new AuthToken(_jwtSettings);
+            var claimsPrincipal = authToken.VerifyToken(token);
 
             // Check if token is valid and claims contain necessary information
             if (claimsPrincipal != null)
@@ -49,11 +59,11 @@ namespace AuthMiddleware
                 {
                     var userData = new AuthenticationResult
                     {
-                        userInfo = new UserInfo
+                        userInfo = new UserModel
                         {
-                            email = email ?? string.Empty,
-                            userId = username ?? string.Empty,
-                            role = role ?? string.Empty
+                            Email = email ?? string.Empty,
+                            //UserId = username ?? string.Empty,
+                            Role = role ?? string.Empty
                         },
                         verificationResult = new VerificationResultDto
                         {
@@ -84,7 +94,9 @@ namespace AuthMiddleware
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             context.Response.ContentType = "application/json";
-            var response = new { message };
+            var response = new VerificationResultDto();
+            response.status = "unauthorized";
+            response.message = message;
             await context.Response.WriteAsync(JsonSerializer.Serialize(response));
         }
 
@@ -94,7 +106,7 @@ namespace AuthMiddleware
             context.Response.ContentType = "application/json";
 
             // Fetch additional user details
-            var userDetails = GetUserDataRepository.GetUserDetailsFromExcel(userData.userInfo.email);
+            var userDetails = GetUserData.GetUserDetailsFromExcel(userData.userInfo.Email);
             userData.userInfo = userDetails;
 
             var response = new

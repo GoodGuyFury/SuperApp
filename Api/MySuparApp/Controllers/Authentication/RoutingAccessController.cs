@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MySuparApp.Repository.RoutingAccess;
-using MySuparApp.Models.Authentication;
+using AuthModel;
 
 namespace MySuparApp.Controllers.RoutingAccess
 {
@@ -19,7 +19,7 @@ namespace MySuparApp.Controllers.RoutingAccess
             {
                 if (HttpContext.Items.TryGetValue("UserData", out var userData))
                 {
-                    var user = userData as UserInfo; // Ensure UserInfo is used here
+                    var user = userData as UserModel; // Ensure UserInfo is used here
                     if (user != null)
                     {
 

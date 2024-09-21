@@ -1,11 +1,11 @@
-﻿using MySuparApp.Models.Authentication;
+﻿using AuthModel;
 using OfficeOpenXml;
 
-namespace MySuparApp.Repository.GetUserData
+namespace GetUserDataRepository
 {
-    public class GetUserDataRepository
+    public class GetUserData
     {
-        public static UserInfo GetUserDetailsFromExcel(string UserEmail = "", string userId = "", string pass = "")
+        public static UserModel GetUserDetailsFromExcel(string UserEmail = "", string userId = "", string pass = "")
         {
             try
             {
@@ -25,13 +25,13 @@ namespace MySuparApp.Repository.GetUserData
 
                             if (cellValue == UserEmail)
                             {
-                                var userDetails = new UserInfo
+                                var userDetails = new UserModel
                                 {
-                                    fullName = worksheet.Cells[row, 3].Text,
-                                    role = worksheet.Cells[row, 5].Text,
-                                    userId = worksheet.Cells[row, 1].Text,
-                                    message = worksheet.Cells[row, 4].Text,
-                                    email = worksheet.Cells[row, 2].Text
+                                    FirstName = worksheet.Cells[row, 3].Text,
+                                    Role = worksheet.Cells[row, 5].Text,
+                                    UserId = worksheet.Cells[row, 1].Text,
+                                    LastName = worksheet.Cells[row, 4].Text,
+                                    Email = worksheet.Cells[row, 2].Text
                                 };
 
                                 return userDetails;
@@ -49,13 +49,13 @@ namespace MySuparApp.Repository.GetUserData
 
                             if (idValue == userId && passValue == pass)
                             {
-                                var userDetails = new UserInfo
+                                var userDetails = new UserModel
                                 {
-                                    fullName = worksheet.Cells[row, 3].Text,
-                                    role = worksheet.Cells[row, 5].Text,
-                                    userId = worksheet.Cells[row, 1].Text,
-                                    message = worksheet.Cells[row, 4].Text,
-                                    email = worksheet.Cells[row, 2].Text
+                                    FirstName = worksheet.Cells[row, 3].Text,
+                                    Role = worksheet.Cells[row, 5].Text,
+                                    UserId = worksheet.Cells[row, 1].Text,
+                                    LastName = worksheet.Cells[row, 4].Text,
+                                    Email = worksheet.Cells[row, 2].Text
                                 };
 
                                 return userDetails;
@@ -69,10 +69,10 @@ namespace MySuparApp.Repository.GetUserData
                 throw new Exception("Error reading Excel file", ex);
             }
 
-            return new UserInfo
+            return new UserModel
             {
-                message = "User not found",
-                email = UserEmail
+                LastName = "User not found",
+                Email = UserEmail
             }; // Return null if user details not found
         }
 

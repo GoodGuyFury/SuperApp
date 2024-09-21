@@ -1,77 +1,20 @@
-<div >
-  <div class="dashboard-content">
-    <mat-card>
-      <mat-card-title>User Management</mat-card-title>
-      <mat-card-content>
-        <!-- User List -->
-        <table mat-table [dataSource]="users" class="mat-elevation-z2">
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef> Name </th>
-            <td mat-cell *matCellDef="let user"> {{user.name}} </td>
-          </ng-container>
+<!-- src/app/features/home/admin-dashboard/admin-dashboard.component.html -->
+<div class="admin-background">
+  <mat-grid-list class="head-gridlist" cols="4" rowHeight="10:1.5">
+    <mat-grid-tile>
+     a
+    </mat-grid-tile>
+    <mat-grid-tile>
+      a
+     </mat-grid-tile>
+     <mat-grid-tile>
+      a
+     </mat-grid-tile>
+     <mat-grid-tile>
+      a
+     </mat-grid-tile>
 
-          <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef> Email </th>
-            <td mat-cell *matCellDef="let user"> {{user.email}} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="role">
-            <th mat-header-cell *matHeaderCellDef> Role </th>
-            <td mat-cell *matCellDef="let user"> {{user.role}} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="message">
-            <th mat-header-cell *matHeaderCellDef> Message </th>
-            <td mat-cell *matCellDef="let user"> {{user.message}} </td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Actions </th>
-            <td mat-cell *matCellDef="let user">
-              <button mat-icon-button color="primary" (click)="editUser(user)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="deleteUser(user)">
-                <mat-icon>delete</mat-icon>
-              </button>
-              <button mat-icon-button [color]="user.isLocked ? 'accent' : 'primary'" (click)="toggleAccess(user)">
-                <mat-icon>{{user.isLocked ? 'lock_open' : 'lock'}}</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="['name', 'email', 'role', 'message', 'actions']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['name', 'email', 'role', 'message', 'actions'];"></tr>
-        </table>
-
-        <!-- Create New User Form -->
-        <form (ngSubmit)="createUser()" #userForm="ngForm" class="user-form">
-          <h3>Create New User</h3>
-          <mat-form-field appearance="fill">
-            <mat-label>Name</mat-label>
-            <input matInput [(ngModel)]="newUser.name" name="name" required>
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Email</mat-label>
-            <input matInput [(ngModel)]="newUser.email" name="email" type="email" required>
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Role</mat-label>
-            <mat-select [(ngModel)]="newUser.role" name="role" required>
-              <mat-option value="admin">Admin</mat-option>
-              <mat-option value="user">User</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field appearance="fill">
-            <mat-label>Message</mat-label>
-            <textarea matInput [(ngModel)]="newUser.message" name="message" required></textarea>
-          </mat-form-field>
-          <button mat-raised-button color="primary" type="submit" [disabled]="!userForm.form.valid">Create User</button>
-        </form>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Fetch User List Button -->
-    <button mat-raised-button color="accent" (click)="fetchUserList()">Refresh User List</button>
-  </div>
+    <!-- Add more grid tiles as needed -->
+  </mat-grid-list>
 </div>
+
