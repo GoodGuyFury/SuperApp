@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgFor } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,13 +40,17 @@ interface User {
     MatOption,
     MatListModule,
     FormsModule,
-    MatAutocompleteModule,MatGridListModule
+    MatAutocompleteModule,MatGridListModule,NgFor
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent implements OnInit{
 
+  adminMenuGrid1: {menuName : string , menuId : number}[] =
+  [{menuName : 'User Management', menuId : 1},{menuName : 'User Management', menuId : 2},
+    {menuName : 'User Management', menuId : 3},{menuName : 'User Management', menuId : 4},
+    {menuName : 'User Management', menuId : 5},{menuName : 'User Management', menuId : 6}]
   searchText: string = '';
   searchResults: User[] = [];
   selectedUsers: User[] = [];
@@ -68,6 +72,10 @@ export class AdminDashboardComponent implements OnInit{
     this.setupSearch();
   }
   createUser(){
+
+  }
+  onTileClick(item : any){
+    console.log(item);
 
   }
   setupSearch(): void {

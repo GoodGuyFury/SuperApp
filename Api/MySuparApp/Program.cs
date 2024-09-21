@@ -4,13 +4,17 @@ using AuthMiddlware;
 using Serilog;
 using RegisteredServicesShared;
 
-var builder = WebApplication.CreateBuilder(args);
-
-Log.Logger = new LoggerConfiguration()
+var logger = new LoggerConfiguration()
     .MinimumLevel.Debug() // Set minimum log level
     .WriteTo.Console() // Log to console
     .WriteTo.File("logs/errorlog.txt", rollingInterval: RollingInterval.Day) // Log file configuration
     .CreateLogger();
+
+Log.Logger = logger;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();  // Remove default providers if needed
+builder.Logging.AddSerilog(logger);  // Use Serilog
 
 // Register DbContext with connection string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

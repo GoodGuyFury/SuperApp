@@ -1,20 +1,11 @@
-<!-- src/app/features/home/admin-dashboard/admin-dashboard.component.html -->
 <div class="admin-background">
-  <mat-grid-list class="head-gridlist" cols="4" rowHeight="10:1.5">
-    <mat-grid-tile>
-     a
+  <mat-grid-list class="head-gridlist" cols="6" rowHeight="10:1.5">
+    <mat-grid-tile *ngFor="let item of adminMenuGrid1">
+      <mat-card class="grid-card" (click)="onTileClick(item)">
+        <mat-card-content>
+          {{ item.menuName }}
+        </mat-card-content>
+      </mat-card>
     </mat-grid-tile>
-    <mat-grid-tile>
-      a
-     </mat-grid-tile>
-     <mat-grid-tile>
-      a
-     </mat-grid-tile>
-     <mat-grid-tile>
-      a
-     </mat-grid-tile>
-
-    <!-- Add more grid tiles as needed -->
   </mat-grid-list>
 </div>
-

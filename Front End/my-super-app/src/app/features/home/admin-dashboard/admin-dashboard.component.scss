@@ -10,7 +10,22 @@
   position: relative;
 }
 .head-gridlist{
-  background-color: rgba(255, 0, 0, 0.5); // Added fixed transparent red color
+  background-color: rgba(0, 0, 0, 0.199); // Added fixed transparent red color
 }
 /* Dashboard content styling */
 
+.grid-card {
+  cursor: pointer; // Change mouse cursor to pointer
+  transition: background-color 0.3s; // Smooth transition for background color
+  user-select: none;
+
+  // Change background color on hover
+  &:hover {
+    background-color: lightblue; // Color when hovered
+  }
+
+  // Change background color when clicked (active state)
+  &:active {
+    background-color: lightgreen; // Color when clicked
+  }
+}
