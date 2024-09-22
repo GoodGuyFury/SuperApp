@@ -1,11 +1,57 @@
 <div class="admin-background">
-  <mat-grid-list class="head-gridlist" cols="6" rowHeight="10:1.5">
-    <mat-grid-tile *ngFor="let item of adminMenuGrid1">
-      <mat-card class="grid-card" (click)="onTileClick(item)">
-        <mat-card-content>
-          {{ item.menuName }}
-        </mat-card-content>
+  <div class="top-form">
+    <mat-grid-list class="head-gridlist" [cols]="cols" rowHeight="30px" gutterSize="10px">
+      <mat-grid-tile *ngFor="let item of adminMenuGrid1" class="grid-tile" (click)="onTileClick(item)">
+            {{ item.menuName }}
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+<div class="bottom-form">
+  <div class="inner-bottom-form">
+    <ng-container *ngIf="activeMenuId == 1">
+      <mat-card>
+        <mat-card-title style="padding: 10px;">User Management</mat-card-title>
+
+        <mat-form-field class="user-searchbox" appearance="fill">
+          <mat-label>Search User</mat-label>
+          <input
+
+            matInput
+            placeholder="User Name"
+            [(ngModel)]="searchText"
+            (input)="onSearchChange(searchText)"
+          />
+        </mat-form-field>
+
+        <div *ngIf="searchResults.length > 0" style="padding: 10px;">
+          <p >Search Results</p>
+          <mat-list>
+            <mat-list-item *ngFor="let user of searchResults" (click)="selectUser(user)">
+              {{ user.firstName + ' '+ user.lastName + ' '+'('+ user.email + ')'}}
+            </mat-list-item>
+          </mat-list>
+        </div>
+
+        <div class="button-group" style="padding: 10px;">
+          <button mat-raised-button color="primary" (click)="fetchUserList()">
+            Get All User List
+          </button>
+          <button mat-raised-button color="accent" >
+            Add New User
+          </button>
+        </div>
       </mat-card>
-    </mat-grid-tile>
-  </mat-grid-list>
+    <div style="padding-top: 10px;">
+      <mat-card *ngIf="selectedUsers.length > 0" style="padding: 10px;">
+        <mat-card-title>Selected Users</mat-card-title>
+        <ul>
+          <li *ngFor="let user of selectedUsers"> {{ user.firstName + ' '+ user.lastName + ' '+'('+ user.email + ')'}}</li>
+        </ul>
+      </mat-card>
+    </div>
+    </ng-container>
+  </div>
 </div>
+
+</div>
+

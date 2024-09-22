@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/auth-guard.service';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth', pathMatch: 'full' },
   {
     path: 'auth',
     loadComponent: () => import('./features/authentication/auth-home/auth-home.component').then(m => m.AuthHomeComponent),
@@ -26,8 +26,7 @@ export const routes: Routes = [
       {
         path: 'admin-dashboard',
         loadComponent: () => import('./features/home/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent),
-        canActivate: [AuthGuard],
-        data: { requiresAdmin: true }
+        canActivate: [AuthGuard]
       }
     ]
   }

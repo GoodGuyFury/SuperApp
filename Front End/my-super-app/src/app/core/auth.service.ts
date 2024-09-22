@@ -9,9 +9,9 @@ export interface AuthResponse {
     message: string;
   };
   userInfo: {
-    fullName: string;
+    firstName: string;
     role: string;
-    message: string;
+    lastName: string;
     userId: string;
     email: string;
   };
@@ -25,25 +25,26 @@ export class AuthService {
   private userRole: string | null = null;
   private userEmail: string | null = null;
   private userId: string | null = null;
-  private fullName: string | null = null;
-  private userMessage: string | null = null;
+  private firstName: string | null = null;
+  private lastName: string | null = null;
   private justloggedOut: boolean = false;
 
   handleAuthResponse(data: AuthResponse): void {
     if (data?.verificationResult?.status.toLowerCase() === "authorized") {
+      this.isAuthenticated = true;
       this.setAuthData(data.userInfo);
     } else {
       this.clearAuthData();
+      return;
     }
   }
 
   setAuthData(userInfo: AuthResponse['userInfo']): void {
-    this.isAuthenticated = true;
     this.userRole = userInfo.role?.toUpperCase() || null;
     this.userEmail = userInfo.email || null;
     this.userId = userInfo.userId || null;
-    this.fullName = userInfo.fullName || null;
-    this.userMessage = userInfo.message || null;
+    this.firstName = userInfo.firstName || null;
+    this.lastName = userInfo.lastName || null;
     this.justloggedOut = false;
   }
 
@@ -52,8 +53,8 @@ export class AuthService {
     this.userRole = null;
     this.userEmail = null;
     this.userId = null;
-    this.fullName = null;
-    this.userMessage = null;
+    this.firstName = null;
+    this.lastName = null;
     this.justloggedOut = true;
   }
 
@@ -74,15 +75,11 @@ export class AuthService {
   }
 
   getFullName(): string | null {
-    return this.fullName;
+    return (this.firstName + '' + this.lastName);
   }
 
   isAdmin(): boolean {
     return this.userRole === 'ADMIN';
-  }
-
-  getUserMessage(): string | null {
-    return this.userMessage;
   }
 
   getJustLoggedOut(): boolean {

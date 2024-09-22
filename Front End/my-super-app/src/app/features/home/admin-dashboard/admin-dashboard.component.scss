@@ -1,31 +1,46 @@
-
-/* Background styling */
 .admin-background {
-  background-image: url('../../../../assets/images/admin-dashboard-background.jpeg'); /* Path to your image */
-  background-size: cover; /* Ensure the image covers the whole element */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent the image from repeating */
-  height: 100%; /* Full height of the component */
+  background: rgb(232,190,62);
+  background: linear-gradient(90deg, rgba(232,190,62,1) 100%, rgba(0,212,255,1) 100%);
+  // background-image: url('../../../../assets/images/admin-dashboard-background.jpeg');
+  // background-size: cover;
+  // background-position: center;
+  // background-repeat: no-repeat;
+  height: 100vh; /* Full viewport height */
   width: 100%; /* Full width of the component */
   position: relative;
 }
-.head-gridlist{
-  background-color: rgba(0, 0, 0, 0.199); // Added fixed transparent red color
-}
-/* Dashboard content styling */
 
-.grid-card {
-  cursor: pointer; // Change mouse cursor to pointer
-  transition: background-color 0.3s; // Smooth transition for background color
+.head-gridlist {
+  background: rgb(63,94,251);
+  background: radial-gradient(circle, rgba(63,94,251,1) 87%, rgba(252,70,107,1) 100%);/* Slight transparency */
+}
+.top-form, .bottom-form{
+  padding: 10px;
+}
+.grid-tile {
+  cursor: pointer;
+  transition: background-color 0.3s;
   user-select: none;
 
-  // Change background color on hover
   &:hover {
-    background-color: lightblue; // Color when hovered
+    background-color: lightblue;
   }
 
-  // Change background color when clicked (active state)
   &:active {
-    background-color: lightgreen; // Color when clicked
+    background-color: lightgreen;
   }
+}
+.bottom-form{
+  // width: 100%;
+  // height: 60px;
+  display: flex; /* Enable flexbox */
+  justify-content: center; /* Center horizontally */
+  align-items: top; /* Center vertically */
+  height: auto;
+}
+.user-searchbox{
+  padding: 10px;
+}
+.inner-bottom-form{
+  width: 80%;
 }

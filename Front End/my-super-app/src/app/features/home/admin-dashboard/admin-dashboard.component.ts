@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -19,8 +19,8 @@ import { MatGridListModule } from '@angular/material/grid-list';
 interface User {
   id: string;
   email: string;
-  name: string;
-  msg: string;
+  firstName: string;
+  lastName: string;
   role: string;
 }
 
@@ -46,10 +46,10 @@ interface User {
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent implements OnInit{
-
+  activeMenuId : number = 0;
   adminMenuGrid1: {menuName : string , menuId : number}[] =
-  [{menuName : 'User Management', menuId : 1},{menuName : 'User Management', menuId : 2},
-    {menuName : 'User Management', menuId : 3},{menuName : 'User Management', menuId : 4},
+  [{menuName : 'User Management', menuId : 1},{menuName : 'Raise Request', menuId : 2},
+    {menuName : 'Check', menuId : 3},{menuName : 'User Management', menuId : 4},
     {menuName : 'User Management', menuId : 5},{menuName : 'User Management', menuId : 6}]
   searchText: string = '';
   searchResults: User[] = [];
@@ -65,17 +65,34 @@ export class AdminDashboardComponent implements OnInit{
     message: '',
     isLocked: false
   };
+  cols: number = 6;
 
   constructor(private adminService: AdminDashboardService) { }
 
   ngOnInit(): void {
     this.setupSearch();
+    this.adjustGrid();
   }
-  createUser(){
 
+  @HostListener('window:resize', ['$event'])
+  onResize(event : any) {
+    this.adjustGrid();
   }
+
+  adjustGrid() {
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= 600) { // Mobile
+      this.cols = 2;
+    } else if (screenWidth <= 960) { // Tablet
+      this.cols = 3;
+    } else { // Desktop
+      this.cols = 6;
+    }
+  }
+
   onTileClick(item : any){
-    console.log(item);
+    this.activeMenuId = item.menuId;
+    console.log(this.activeMenuId);
 
   }
   setupSearch(): void {

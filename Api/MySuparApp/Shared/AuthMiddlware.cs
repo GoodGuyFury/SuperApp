@@ -115,7 +115,12 @@ namespace AuthMiddlware
                 userData.userInfo
             };
 
-            await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response , options));
         }
     }
 }

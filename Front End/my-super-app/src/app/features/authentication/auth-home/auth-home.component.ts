@@ -24,8 +24,6 @@ export class AuthHomeComponent implements OnInit {
       next: () => {
         if (this.authService.isLoggedIn()) {
           this.router.navigate(['/home/dashboard']);
-        } else {
-          this.router.navigate(['/auth/login']);
         }
       },
       error: (error) => {
