@@ -15,11 +15,11 @@ export class LoginBoxService {
     private authService: AuthService
   ) { }
 
-  directLogin(username: string, password: string): Observable<AuthResponse> {
+  directLogin(email: string, password: string): Observable<AuthResponse> {
     const url = `${this.apiUrl}/login/directlogin`;
 
     const formData = new FormData();
-    formData.append('username', username);
+    formData.append('email', email);
     formData.append('password', password);
 
     const headers = new HttpHeaders({

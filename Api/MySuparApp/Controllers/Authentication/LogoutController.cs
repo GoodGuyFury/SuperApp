@@ -1,18 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using AuthTokenRepository;
-using AuthModel;
+using MySuparApp.Repository.Authentication;
+using MySuparApp.Models.Authentication;
 
-namespace MySuparApp.Controllers.Logout
+namespace MySuparApp.Controllers.Authentication
 {
     [ApiController]
     [Route("[controller]")]
     public class LogoutController : ControllerBase
     {
         private readonly ILogger<LogoutController> _logger;
-        private readonly AuthToken _authToken; // Non-nullable field
+        private readonly IAuthToken _authToken; // Non-nullable field
 
-        public LogoutController(ILogger<LogoutController> logger, AuthToken authToken) // Single constructor
+        public LogoutController(ILogger<LogoutController> logger, IAuthToken authToken) // Single constructor
         {
             _logger = logger;
             _authToken = authToken; // Ensure it's not null

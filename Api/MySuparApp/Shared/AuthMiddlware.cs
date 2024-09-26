@@ -1,24 +1,22 @@
 ﻿using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using AuthModel;
-using GetUserDataRepository;
-using AuthTokenRepository;
+using MySuparApp.Models.Authentication;
+using MySuparApp.Repository.Authentication;
 using Microsoft.Extensions.Options;
-using AppSettingsModel;
+using MySuparApp.Models.Shared;
 
-namespace AuthMiddlware
+namespace MySuparApp.Shared
 {
     public class AuthHandler : IMiddleware
     {
         private readonly IOptions<JwtSettings> _jwtSettings;
+        private readonly IGetUserData _getUserData;
 
         // Inject IOptions<JwtSettings> via the constructor
-        public AuthHandler(IOptions<JwtSettings> jwtSettings)
+        public AuthHandler(IOptions<JwtSettings> jwtSettings, IGetUserData getUserData)
         {
             _jwtSettings = jwtSettings;
+            _getUserData = getUserData;
         }
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
@@ -48,8 +46,10 @@ namespace AuthMiddlware
             if (claimsPrincipal != null)
             {
                 var email = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
-                var username = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
+                var firstName = claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value;
+                var lastName = claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value;
                 var role = claimsPrincipal.FindFirst(ClaimTypes.Role)?.Value;
+                var userId = claimsPrincipal.FindFirst("UserId")?.Value;
                 var jwtVerifiedClaim = claimsPrincipal.FindFirst("JWTVerified")?.Value; // Use the correct claim name
 
 
@@ -63,7 +63,10 @@ namespace AuthMiddlware
                         {
                             Email = email ?? string.Empty,
                             //UserId = username ?? string.Empty,
-                            Role = role ?? string.Empty
+                            Role = role ?? string.Empty,
+                            FirstName = firstName ?? string.Empty,
+                            LastName = lastName ?? string.Empty,
+                            UserId = userId ?? string.Empty,
                         },
                         verificationResult = new VerificationResultDto
                         {
@@ -106,7 +109,7 @@ namespace AuthMiddlware
             context.Response.ContentType = "application/json";
 
             // Fetch additional user details
-            var userDetails = GetUserData.GetUserDetailsFromExcel(userData.userInfo.Email);
+            var userDetails = await _getUserData.GetUserDetails(userData.userInfo.Email, authToken:true);
             userData.userInfo = userDetails;
 
             var response = new

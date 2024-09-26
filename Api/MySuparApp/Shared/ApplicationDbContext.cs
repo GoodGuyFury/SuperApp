@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using AuthModel;
+using MySuparApp.Models.Authentication;
 
-namespace ApplicationDbContextShared // Replace with your actual namespace
+namespace MySuparApp.Shared // Replace with your actual namespace
 {
     public class ApplicationDbContext : DbContext
     {
@@ -12,9 +12,12 @@ namespace ApplicationDbContextShared // Replace with your actual namespace
         // Define your DbSet properties (tables)
         public DbSet<UserModel> Users { get; set; }
 
+        public DbSet<UserCredModel> UserCred { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<UserModel>().ToTable("User Table");
+            modelBuilder.Entity<UserModel>().ToTable("UserDetails").HasKey(u => u.UserId); ;
+            modelBuilder.Entity<UserCredModel>().ToTable("UserCreds");
         }
     }
 }

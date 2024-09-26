@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AuthModel
+namespace MySuparApp.Models.Authentication
 {
   
     public class UserModel
@@ -10,6 +10,12 @@ namespace AuthModel
         public string LastName { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+    }
+    public class UserCredModel
+    {
+        [Key] public string UserId { get; set; } = string.Empty;
+        public string HashedPassword { get; set; } = string.Empty;
+        public string Salt { get; set; } = string.Empty;
     }
     public class GoogleUserInfo
     {

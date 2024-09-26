@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MySuparApp.Repository.RoutingAccess;
-using AuthModel;
+using MySuparApp.Repository.Authentication;
+using MySuparApp.Models.Authentication;
 
-namespace MySuparApp.Controllers.RoutingAccess
+namespace MySuparApp.Controllers.Authentication
 {
     public class RoutingController : Controller
     {

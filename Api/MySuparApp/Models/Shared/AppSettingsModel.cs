@@ -1,4 +1,4 @@
-﻿namespace AppSettingsModel
+﻿namespace MySuparApp.Models.Shared
 {
     public static class GoogleSettings
     {

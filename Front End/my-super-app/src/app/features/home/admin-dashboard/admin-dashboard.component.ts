@@ -1,28 +1,28 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTableModule } from '@angular/material/table';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
+
 import { MatInputModule } from '@angular/material/input';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/core';
-import { FormsModule, NgModel } from '@angular/forms';
-import { AdminDashboardService } from './admin-dashboard.service';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { MatSelect, MatOption } from '@angular/material/select';
 import { MatListModule } from '@angular/material/list';
+
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { AdminDashboardService } from './admin-dashboard.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { AuthResponse } from '../../../core/auth.service';
 
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-}
+type User = AuthResponse['userInfo'];
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -40,7 +40,7 @@ interface User {
     MatOption,
     MatListModule,
     FormsModule,
-    MatAutocompleteModule,MatGridListModule,NgFor
+    MatAutocompleteModule,MatGridListModule,MatDialogModule,NgFor
   ],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
@@ -48,26 +48,25 @@ interface User {
 export class AdminDashboardComponent implements OnInit{
   activeMenuId : number = 0;
   adminMenuGrid1: {menuName : string , menuId : number}[] =
-  [{menuName : 'User Management', menuId : 1},{menuName : 'Raise Request', menuId : 2},
-    {menuName : 'Check', menuId : 3},{menuName : 'User Management', menuId : 4},
-    {menuName : 'User Management', menuId : 5},{menuName : 'User Management', menuId : 6}]
+  [{menuName : 'User Management', menuId : 1},{menuName : 'Raise Request', menuId : 2}]
   searchText: string = '';
   searchResults: User[] = [];
   selectedUsers: User[] = [];
   private searchSubject = new Subject<string>();
+  @ViewChild('userPopup') userPopup!: TemplateRef<any>;
+   private dialogRef!: MatDialogRef<any>
 
   users: any[] = [];
-
-  newUser: any = {
-    name: '',
-    email: '',
-    role: '',
-    message: '',
-    isLocked: false
-  };
+  isEditMode : boolean = false;
   cols: number = 6;
-
-  constructor(private adminService: AdminDashboardService) { }
+  selectedUserEditViewDelete : User ={
+    firstName: '',
+    role: 'string',
+    lastName: 'string',
+    userId: 'string',
+    email: 'string',
+  };;
+  constructor(private adminService: AdminDashboardService, private dialog : MatDialog) { }
 
   ngOnInit(): void {
     this.setupSearch();
@@ -110,30 +109,47 @@ export class AdminDashboardComponent implements OnInit{
   onSearchChange(searchValue: string): void {
     this.searchSubject.next(searchValue);
   }
-
+  removeUser(user:User, i :number){
+    this.selectedUsers = this.selectedUsers.filter(obj => obj.userId !== user.userId);
+  }
   performSearch(searchText: string): void {
     this.adminService.fetchUserList(searchText).subscribe({
       next: (response: User[]) => {
+        console.log(this.searchResults, response);
+// debugger;
         this.searchResults = response.filter(user =>
-          !this.selectedUsers.some(selectedUser => selectedUser.id === user.id)
+          !this.selectedUsers.some(selectedUser => selectedUser.userId === user.userId)
         );
+        console.log(this.searchResults);
+
       },
       error: (error) => {
         console.error('Error searching users:', error);
-      }
+      },
+    });
+  }
+
+  editUser(user: User, i : number) {
+    this.isEditMode = true;
+    this.selectedUserEditViewDelete = { ...user }; // Clone the user data to prevent changes
+    this.dialogRef = this.dialog.open(this.userPopup, {
+      data: { user: this.selectedUserEditViewDelete, isEditMode: this.isEditMode }
+    });
+  }
+
+  viewUserDetails(user: User , i : number) {
+    this.isEditMode = false;
+    this.selectedUserEditViewDelete = { ...user }; // Clone the user data to prevent changes
+    this.dialogRef = this.dialog.open(this.userPopup, {
+      data: { user: this.selectedUserEditViewDelete, isEditMode: this.isEditMode }
     });
   }
 
   selectUser(user: User): void {
-    debugger;
+    // debugger;
     this.selectedUsers.push({...user});
-    this.searchResults = this.searchResults.filter(u => u.id !== user.id);
+    this.searchResults = this.searchResults.filter(u => u.userId !== user.userId);
     this.searchText = '';
-  }
-
-  saveChanges(): void {
-    // Implement logic to save changes to selected users
-    console.log('Saving changes:', this.selectedUsers);
   }
 
   fetchUserList(): void {
@@ -146,6 +162,24 @@ export class AdminDashboardComponent implements OnInit{
         // Handle error (e.g., show error message to user)
       }
     });
+  }
+
+  saveUser(user: User) {
+    console.log('Saving user:', user);
+
+    this.adminService.updateUser(user).subscribe({
+      next: (response) => {
+        this.selectedUserEditViewDelete = response;
+        console.log('User updated successfully:', response);
+        if (this.dialogRef) {
+          this.dialogRef.close(); // Close the specific dialog instance
+        }
+      },
+      error: (error) => {
+        console.error('Error updating user:', error);
+      }
+    });
+
   }
 
 }

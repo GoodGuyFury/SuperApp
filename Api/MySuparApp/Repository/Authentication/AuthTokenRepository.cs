@@ -4,11 +4,19 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
-using AppSettingsModel;
+using MySuparApp.Models.Shared;
 
-namespace AuthTokenRepository
+namespace MySuparApp.Repository.Authentication
 {
-    public class AuthToken
+    public interface IAuthToken
+    {
+        string GenerateToken(string userId, string firstName, string lastName, string email, string role);
+
+        ClaimsPrincipal? VerifyToken(string token);
+
+        bool RemoveAuthTokenCookie(HttpRequest request, HttpResponse response);
+    }
+    public class AuthToken : IAuthToken
     {
         private readonly JwtSettings _jwtSettings;
 
@@ -18,7 +26,7 @@ namespace AuthTokenRepository
         }
 
         // Method to generate JWT token
-        public string GenerateToken(string email, string name, string role, string username)
+        public string GenerateToken(string userId,string firstName, string lastName, string email, string role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
@@ -27,11 +35,12 @@ namespace AuthTokenRepository
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Email, email),
-                    new Claim(ClaimTypes.Name, name),
-                    new Claim(ClaimTypes.Role, role),
-                    new Claim("Username", username),
-                    new Claim("JWTVerified", "true")
+                       new Claim(ClaimTypes.Email, email),
+                       new Claim(ClaimTypes.GivenName, firstName), // Use GivenName for first name
+                        new Claim(ClaimTypes.Surname, lastName),   // Use Surname for last name
+                        new Claim(ClaimTypes.Role, role),
+                         new Claim("UserId", userId),                // Custom claim
+                          new Claim("JWTVerified", "true")
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.TokenExpiryInMinutes),
                 Issuer = _jwtSettings.Issuer, // Use issuer from settings

@@ -29,6 +29,6 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
       }
     ]
-  }
-
+  },
+  { path: '**', redirectTo: '/home/dashboard' }
 ];

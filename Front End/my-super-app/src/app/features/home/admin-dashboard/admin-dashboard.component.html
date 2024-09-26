@@ -45,13 +45,56 @@
       <mat-card *ngIf="selectedUsers.length > 0" style="padding: 10px;">
         <mat-card-title>Selected Users</mat-card-title>
         <ul>
-          <li *ngFor="let user of selectedUsers"> {{ user.firstName + ' '+ user.lastName + ' '+'('+ user.email + ')'}}</li>
+          <li *ngFor="let user of selectedUsers; let i = index ">
+            {{ user.firstName + ' '+ user.lastName + ' '+'('+ user.email + ')'}}
+
+            <button mat-icon-button (click)="viewUserDetails(user, i)" aria-label="View details">
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button mat-icon-button (click)="editUser(user, i)" aria-label="Edit user">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button mat-icon-button (click)="removeUser(user, i)" aria-label="Remove user">
+              <mat-icon>close</mat-icon>
+            </button>
+          </li>
         </ul>
       </mat-card>
     </div>
     </ng-container>
   </div>
 </div>
-
 </div>
+<ng-template #userPopup>
+  <h4  mat-dialog-title>{{ isEditMode ? 'Edit User' : 'View User' }}</h4>
+
+  <mat-dialog-content>
+    <mat-form-field class="popup-field">
+      <mat-label>First Name</mat-label>
+      <input matInput [(ngModel)]="selectedUserEditViewDelete.firstName" [disabled]="!isEditMode">
+    </mat-form-field>
+
+    <mat-form-field class="popup-field">
+      <mat-label>Last Name</mat-label>
+      <input matInput [(ngModel)]="selectedUserEditViewDelete.lastName" [disabled]="!isEditMode">
+    </mat-form-field>
+
+    <mat-form-field class="popup-field">
+      <mat-label>Email</mat-label>
+      <input matInput [(ngModel)]="selectedUserEditViewDelete.email" [disabled]="!isEditMode">
+    </mat-form-field>
+
+    <mat-form-field class="popup-field">
+      <mat-label>Role</mat-label>
+      <input matInput [(ngModel)]="selectedUserEditViewDelete.role" [disabled]="!isEditMode">
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button mat-dialog-close>Close</button>
+    <button mat-button *ngIf="isEditMode" (click)="saveUser(selectedUserEditViewDelete)">Save</button>
+  </mat-dialog-actions>
+</ng-template>
 

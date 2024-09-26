@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using AdminRepository; // Adjust based on your structure
-using AuthModel; // Assuming UserModel is defined here
+using MySuparApp.Repository.Admin; // Adjust based on your structure
+using MySuparApp.Models.Authentication; // Assuming UserModel is defined here
 using System;
 using System.Threading.Tasks;
 
@@ -10,9 +10,9 @@ namespace MySuparApp.Controllers.Admin
     [Route("admin")]
     public class AdminController : ControllerBase
     {
-        private readonly UserManagement _usermanagement;
+        private readonly IAdminRepository _usermanagement;
 
-        public AdminController(UserManagement usermanagement)
+        public AdminController(IAdminRepository usermanagement)
         {
             _usermanagement = usermanagement;
         }
@@ -42,6 +42,19 @@ namespace MySuparApp.Controllers.Admin
             {
                 var users = await _usermanagement.GetUsersAsync(searchText);
                 return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+        [HttpPost("updateuser")]
+        public async Task<IActionResult> UpdateUserAsync([FromBody] UserModel user)
+        {
+            try
+            {
+                var result = await _usermanagement.UpdateUserAsync(user);
+                return Ok(result);
             }
             catch (Exception ex)
             {

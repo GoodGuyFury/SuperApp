@@ -1,12 +1,15 @@
 ﻿using Google.Apis.Auth;
 using Google.Apis.Util;
-using AuthModel;
+using MySuparApp.Models.Authentication;
 
-namespace GoogleTokenVerifierRepository
-{
-    public class GoogleTokenVerifier
+namespace MySuparApp.Repository.Authentication
+{ public interface IGoogleTokenVerifier
     {
-        public static async Task<GoogleUserInfo> VerifyGoogleTokenAndGetEmailAsync(string jwtToken, string expectedClientId)
+        public Task<GoogleUserInfo> VerifyGoogleTokenAndGetEmailAsync(string jwtToken, string expectedClientId);
+    }
+    public class GoogleTokenVerifier : IGoogleTokenVerifier
+    {
+        public async Task<GoogleUserInfo> VerifyGoogleTokenAndGetEmailAsync(string jwtToken, string expectedClientId)
         {
             var result = new GoogleUserInfo();
             try

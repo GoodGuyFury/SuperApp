@@ -21,15 +21,15 @@ export class LoginBoxComponent implements OnInit {
 
   ngOnInit() {
     this.loginForm = this.formBuilder.group({
-      username: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
   }
 
   onSubmit() {
     if (this.loginForm.valid) {
-      const { username, password } = this.loginForm.value;
-      this.loginBoxService.directLogin(username, password).subscribe({
+      const { email, password } = this.loginForm.value;
+      this.loginBoxService.directLogin(email, password).subscribe({
         next: (response) => {
           this.router.navigate(['/home/dashboard']);
           // Handle successful login
