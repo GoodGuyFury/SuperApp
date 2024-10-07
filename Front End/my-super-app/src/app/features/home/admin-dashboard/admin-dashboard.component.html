@@ -1,68 +1,107 @@
 <div class="admin-background">
   <div class="top-form">
-    <mat-grid-list class="head-gridlist" [cols]="cols" rowHeight="30px" gutterSize="10px">
-      <mat-grid-tile *ngFor="let item of adminMenuGrid1" class="grid-tile" (click)="onTileClick(item)">
-            {{ item.menuName }}
-      </mat-grid-tile>
-    </mat-grid-list>
+    <mat-toolbar color="primary" class="top-toolbar">
+      <button mat-button *ngFor="let item of adminMenuGrid1" (click)="onTileClick(item)">
+        {{ item.menuName }}
+      </button>
+    </mat-toolbar>
   </div>
-<div class="bottom-form">
+  <div class="bottom-form">
   <div class="inner-bottom-form">
     <ng-container *ngIf="activeMenuId == 1">
-      <mat-card>
-        <mat-card-title style="padding: 10px;">User Management</mat-card-title>
+      <mat-card class="user-management-card full-width">
+        <mat-card-title style="padding: 10px; font-size: medium;">User Management</mat-card-title>
 
-        <mat-form-field class="user-searchbox" appearance="fill">
-          <mat-label>Search User</mat-label>
-          <input
+        <mat-grid-list cols="2" rowHeight="54px" gutterSize="10px" style="border: none;">
+          <mat-grid-tile>
+            <mat-form-field class="user-searchbox full-width" appearance="fill">
+              <mat-label style="font-size: small;">Search User</mat-label>
+              <input style="font-size: small;" matInput placeholder="User Name" [(ngModel)]="searchText" (input)="onSearchChange(searchText)" />
+            </mat-form-field>
+          </mat-grid-tile>
 
-            matInput
-            placeholder="User Name"
-            [(ngModel)]="searchText"
-            (input)="onSearchChange(searchText)"
-          />
-        </mat-form-field>
+          <mat-grid-tile>
+            <button style="font-size: medium;" class="full-width" mat-raised-button color="primary" (click)="fetchUserList()">Get All User List</button>
+            <button style="font-size: medium;" class="full-width" mat-raised-button color="accent" (click)="addUser()">Add New User</button>
+          </mat-grid-tile>
 
-        <div *ngIf="searchResults.length > 0" style="padding: 10px;">
-          <p >Search Results</p>
+          <!-- <mat-grid-tile>
+
+          </mat-grid-tile> -->
+        </mat-grid-list>
+
+        <div appClickOutside (clickOutside)="closeSearchResults()" *ngIf="searchResults.length > 0" style="padding: 10px;">
+          <p>Search Results</p>
           <mat-list>
             <mat-list-item *ngFor="let user of searchResults" (click)="selectUser(user)">
-              {{ user.firstName + ' '+ user.lastName + ' '+'('+ user.email + ')'}}
+              {{ user.firstName + ' ' + user.lastName + ' ' + '(' + user.email + ')' }}
             </mat-list-item>
           </mat-list>
         </div>
-
-        <div class="button-group" style="padding: 10px;">
-          <button mat-raised-button color="primary" (click)="fetchUserList()">
-            Get All User List
-          </button>
-          <button mat-raised-button color="accent" >
-            Add New User
-          </button>
-        </div>
       </mat-card>
-    <div style="padding-top: 10px;">
-      <mat-card *ngIf="selectedUsers.length > 0" style="padding: 10px;">
-        <mat-card-title>Selected Users</mat-card-title>
-        <ul>
-          <li *ngFor="let user of selectedUsers; let i = index ">
-            {{ user.firstName + ' '+ user.lastName + ' '+'('+ user.email + ')'}}
+      <div style="padding-top: 10px;">
+        <mat-card *ngIf="selectedUsers.length > 0" style="padding: 10px;" class="full-width">
+          <mat-card-title style="padding-left: 10px;">Selected Users</mat-card-title>
 
-            <button mat-icon-button (click)="viewUserDetails(user, i)" aria-label="View details">
-              <mat-icon>visibility</mat-icon>
-            </button>
+          <table mat-table [dataSource]="usersTableDataSource" class="mat-elevation-z8">
 
-            <button mat-icon-button (click)="editUser(user, i)" aria-label="Edit user">
-              <mat-icon>edit</mat-icon>
-            </button>
+            <!-- First Name Column -->
+            <ng-container matColumnDef="firstName">
+              <th class="hide-on-small" mat-header-cell *matHeaderCellDef> First Name </th>
+              <td class="hide-on-small" mat-cell *matCellDef="let user"> {{ user.firstName }} </td>
+            </ng-container>
 
-            <button mat-icon-button (click)="removeUser(user, i)" aria-label="Remove user">
-              <mat-icon>close</mat-icon>
-            </button>
-          </li>
-        </ul>
-      </mat-card>
-    </div>
+            <!-- Last Name Column -->
+            <ng-container matColumnDef="lastName">
+              <th class="hide-on-small" mat-header-cell *matHeaderCellDef> Last Name </th>
+              <td class="hide-on-small" mat-cell *matCellDef="let user"> {{ user.lastName }} </td>
+            </ng-container>
+
+            <!-- Email Column -->
+            <ng-container matColumnDef="email">
+              <th class="hide-on-small" mat-header-cell *matHeaderCellDef> Email </th>
+              <td class="hide-on-small" mat-cell *matCellDef="let user"> {{ user.email }} </td>
+            </ng-container>
+            <ng-container matColumnDef="role">
+              <th class="hide-on-small" mat-header-cell *matHeaderCellDef> Role </th>
+              <td class="hide-on-small" mat-cell *matCellDef="let user"> {{ user.role }} </td>
+            </ng-container>
+            <ng-container matColumnDef="combined">
+              <th mat-header-cell *matHeaderCellDef class="combined-info-cell"> User Info </th>
+              <td mat-cell *matCellDef="let user" class="combined-info-cell">
+                {{ getCombinedUserInfo(user) }}
+              </td>
+            </ng-container>
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef> Actions </th>
+              <td mat-cell *matCellDef="let user">
+                <button mat-icon-button (click)="viewUserDetails(user)" aria-label="View details">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button (click)="editUser(user)" aria-label="Edit user">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="openPasswordDialog(user)" aria-label="Update Password">
+                  <mat-icon>password</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteUser(user)" aria-label="Delete user">
+                  <mat-icon>delete</mat-icon>
+                </button>
+                <button mat-icon-button (click)="removeUser(user)" aria-label="Remove user">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['firstName', 'lastName', 'email', 'role', 'combined', 'actions']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['firstName', 'lastName', 'email', 'role', 'combined', 'actions'];"></tr>
+          </table>
+        </mat-card>
+      </div>
+
+
+
     </ng-container>
   </div>
 </div>
@@ -73,28 +112,62 @@
   <mat-dialog-content>
     <mat-form-field class="popup-field">
       <mat-label>First Name</mat-label>
-      <input matInput [(ngModel)]="selectedUserEditViewDelete.firstName" [disabled]="!isEditMode">
+      <input matInput [(ngModel)]="selectedUserToModify.firstName" [disabled]="!isEditMode">
     </mat-form-field>
 
     <mat-form-field class="popup-field">
       <mat-label>Last Name</mat-label>
-      <input matInput [(ngModel)]="selectedUserEditViewDelete.lastName" [disabled]="!isEditMode">
+      <input matInput [(ngModel)]="selectedUserToModify.lastName" [disabled]="!isEditMode">
     </mat-form-field>
 
     <mat-form-field class="popup-field">
       <mat-label>Email</mat-label>
-      <input matInput [(ngModel)]="selectedUserEditViewDelete.email" [disabled]="!isEditMode">
+      <input type="email" matInput [(ngModel)]="selectedUserToModify.email" [disabled]="!isEditMode">
     </mat-form-field>
 
-    <mat-form-field class="popup-field">
+    <mat-form-field class="popup-field" *ngIf="selectedUserToModify.role !== 'SuperAdmin'; else superAdminRole">
       <mat-label>Role</mat-label>
-      <input matInput [(ngModel)]="selectedUserEditViewDelete.role" [disabled]="!isEditMode">
+      <mat-select [(ngModel)]="selectedUserToModify.role" [disabled]="!isEditMode">
+        <mat-option value="Admin">Admin</mat-option>
+        <mat-option value="User">User</mat-option>
+        <mat-option value="Guest">Guest</mat-option>
+        <mat-option value="Mods">Mods</mat-option>
+      </mat-select>
     </mat-form-field>
+
+    <ng-template #superAdminRole>
+      <mat-form-field class="popup-field">
+        <mat-label>Role</mat-label>
+        <input matInput value="{{ selectedUserToModify.role }}" disabled>
+      </mat-form-field>
+    </ng-template>
   </mat-dialog-content>
 
   <mat-dialog-actions>
     <button mat-button mat-dialog-close>Close</button>
-    <button mat-button *ngIf="isEditMode" (click)="saveUser(selectedUserEditViewDelete)">Save</button>
+    <button mat-button *ngIf="isEditMode" (click)="saveUser(selectedUserToModify, isNewUser)">Save</button>
   </mat-dialog-actions>
 </ng-template>
+<ng-template #passwordPopup>
+  <h4 mat-dialog-title>Update Password</h4>
+  <mat-dialog-content>
+    <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()">
+      <mat-form-field class="popup-field">
+        <mat-label>New Password</mat-label>
+        <input type="password" matInput formControlName="newPassword" required minlength="6">
+        <mat-error *ngIf="passwordForm.get('newPassword')?.invalid &&
+                          (passwordForm.get('newPassword')?.dirty ||
+                           passwordForm.get('newPassword')?.touched)">
+          <span *ngIf="passwordForm.get('newPassword')?.errors?.['required']">Password is required.</span>
+          <span *ngIf="passwordForm.get('newPassword')?.errors?.['minlength']">Minimum length is 6.</span>
+        </mat-error>
+      </mat-form-field>
+      <mat-dialog-actions>
+        <button mat-button mat-dialog-close>Close</button>
+        <button mat-button type="submit" [disabled]="passwordForm.invalid">Update Password</button>
+      </mat-dialog-actions>
+    </form>
+  </mat-dialog-content>
+</ng-template>
+
 

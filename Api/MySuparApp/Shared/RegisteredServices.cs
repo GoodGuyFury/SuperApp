@@ -3,6 +3,8 @@ using MySuparApp.Models.Shared;
 using MySuparApp.Repository.Admin;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using MySuparApp.Models.Authentication;
+using MySuperApp.Repository.Authentication;
 
 namespace MySuparApp.Shared
 {
@@ -25,21 +27,24 @@ namespace MySuparApp.Shared
             // Register DbContext with connection string
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
-                    sqlOptions.CommandTimeout(180)));
+                    sqlOptions.CommandTimeout(180)).EnableSensitiveDataLogging());
 
             // Register JwtSettings from appsettings.json
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
             // Load GoogleClientId from appsettings.json
-            GoogleSettings.GoogleClientId = configuration["GoogleClientId"];
+            GoogleSettings.GoogleClientId = configuration["GoogleClientId"] ?? throw new ArgumentNullException("GoogleClientId cannot be null."); ;
 
             // Register services for dependency injection
             services.AddScoped<AuthHandler>();
             services.AddScoped<IAuthToken, AuthToken>();
-            services.AddScoped<IAdminRepository, UserManagement>();
+            services.AddScoped<IUserManagement, UserManagement>();
             services.AddScoped<IGetUserData, GetUserData>();
             services.AddScoped<IGoogleTokenVerifier, GoogleTokenVerifier>();
             services.AddScoped<ICookieHandler, CookieHandler>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IPasswordManager, PasswordManager>();
+            services.AddAutoMapper(typeof(AutoMapperProfile));
 
             // Configure CORS policy
             var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
@@ -47,7 +52,7 @@ namespace MySuparApp.Shared
             {
                 options.AddPolicy("AllowSpecificOrigins", policyBuilder =>
                 {
-                    policyBuilder.WithOrigins(allowedOrigins)
+                    policyBuilder.WithOrigins(allowedOrigins ?? throw new ArgumentNullException("Please add allowed origins."))
                                  .AllowAnyHeader()
                                  .AllowAnyMethod()
                                  .AllowCredentials();

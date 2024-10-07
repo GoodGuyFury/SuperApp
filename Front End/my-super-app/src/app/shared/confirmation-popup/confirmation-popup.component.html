@@ -1,0 +1,10 @@
+<mat-card style="background-color: aliceblue;">
+  <h1 mat-dialog-title class="dialog-title">{{ data.title }}</h1>
+  <mat-card-content>
+    <p class="dialog-message">{{ data.message }}</p>
+  </mat-card-content>
+  <mat-card-actions>
+    <button style="background-color: black;" mat-button class="cancel-button" (click)="onCancel()">Cancel</button>
+    <button style="background-color: black;" mat-raised-button color="primary" (click)="onProceed()">Proceed</button>
+  </mat-card-actions>
+</mat-card>

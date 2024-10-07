@@ -4,15 +4,13 @@ import { Injectable } from '@angular/core';
 
 // Add this interface at the top of the file
 export interface AuthResponse {
-  verificationResult: {
-    status: string;
-    message: string;
-  };
+  message: string;
+  status: string;
   userInfo: {
     firstName: string;
     role: string;
     lastName: string;
-    userId: string;
+    userId: number | null;
     email: string;
   };
 }
@@ -24,13 +22,13 @@ export class AuthService {
   private isAuthenticated: boolean = false;
   private userRole: string | null = null;
   private userEmail: string | null = null;
-  private userId: string | null = null;
+  private userId: number | null = null;
   private firstName: string | null = null;
   private lastName: string | null = null;
   private justloggedOut: boolean = false;
 
   handleAuthResponse(data: AuthResponse): void {
-    if (data?.verificationResult?.status.toLowerCase() === "authorized") {
+    if (data?.status.toLowerCase() === "authorized") {
       this.isAuthenticated = true;
       this.setAuthData(data.userInfo);
     } else {
@@ -70,7 +68,7 @@ export class AuthService {
     return this.userEmail;
   }
 
-  getUserId(): string | null {
+  getUserId(): number | null {
     return this.userId;
   }
 
@@ -79,9 +77,11 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return this.userRole === 'ADMIN';
+    return (this.userRole === 'ADMIN' || this.userRole === 'SUPERADMIN');
   }
-
+  isSuperAdmin():boolean{
+    return this.userRole ==='SUPERADMIN'
+  }
   getJustLoggedOut(): boolean {
     return this.justloggedOut;
   }

@@ -22,19 +22,14 @@ namespace MySuparApp.Controllers.Authentication
         public IActionResult Logout()
         {
             var authRemoved = _authToken.RemoveAuthTokenCookie(Request, Response); // Call the instance method
-            var result = new VerificationResultDto();
+       
             if (authRemoved)
             {
-                result.status = "unathorized";
-                result.message = "Logged Out Succesfully";
-                _logger.LogInformation("User logged out and 'token-1' cookie removed.");
-                return Unauthorized(result);
+                _logger.LogInformation("User logged out and 'auth-token' cookie removed.");
+                return Unauthorized(ResultStatusDto<object>.CreateSuccess("User logged out and 'auth-token' cookie removed."));
             }
-            result.status = "bad request";
-            result.message = "Logout attempted, but 'token-1' cookie was not found.";
-
-            _logger.LogWarning("Logout attempted, but 'token-1' cookie was not found.");
-            return BadRequest(result);
+            _logger.LogWarning("Logout attempted, but 'auth-token' cookie was not found.");
+            return BadRequest(ResultStatusDto<object>.CreateError("Logout attempted, but 'auth-token' cookie was not found."));
         }
     }
 }

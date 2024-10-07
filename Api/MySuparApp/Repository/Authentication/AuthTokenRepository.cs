@@ -5,12 +5,13 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using MySuparApp.Models.Shared;
+using MySuparApp.Models.Authentication;
 
 namespace MySuparApp.Repository.Authentication
 {
     public interface IAuthToken
     {
-        string GenerateToken(string userId, string firstName, string lastName, string email, string role);
+        string GenerateToken(string userId, string firstName, string lastName, string email, UserRole role);
 
         ClaimsPrincipal? VerifyToken(string token);
 
@@ -26,7 +27,7 @@ namespace MySuparApp.Repository.Authentication
         }
 
         // Method to generate JWT token
-        public string GenerateToken(string userId,string firstName, string lastName, string email, string role)
+        public string GenerateToken(string userId,string firstName, string lastName, string email, UserRole role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
@@ -38,7 +39,7 @@ namespace MySuparApp.Repository.Authentication
                        new Claim(ClaimTypes.Email, email),
                        new Claim(ClaimTypes.GivenName, firstName), // Use GivenName for first name
                         new Claim(ClaimTypes.Surname, lastName),   // Use Surname for last name
-                        new Claim(ClaimTypes.Role, role),
+                        new Claim(ClaimTypes.Role, role.ToString()),
                          new Claim("UserId", userId),                // Custom claim
                           new Claim("JWTVerified", "true")
                 }),
@@ -83,9 +84,9 @@ namespace MySuparApp.Repository.Authentication
 
         public bool RemoveAuthTokenCookie(HttpRequest request, HttpResponse response)
         {
-            if (request.Cookies.ContainsKey("token-1"))
+            if (request.Cookies.ContainsKey("auth-token"))
             {
-                response.Cookies.Append("token-1", "", new CookieOptions
+                response.Cookies.Append("auth-token", "", new CookieOptions
                 {
                     Expires = DateTimeOffset.UtcNow.AddDays(-1),
                     Secure = true,

@@ -61,7 +61,7 @@ export class AuthGuard implements CanActivate {
           return true;
         }
       } else {
-        if (isLoggedIn && (isAdmin || this.authService.getUserRole() === 'USER')) {
+        if (isLoggedIn) {
           return true;
         }
       }

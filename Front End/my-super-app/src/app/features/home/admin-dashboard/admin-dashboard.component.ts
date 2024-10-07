@@ -1,99 +1,105 @@
+import { ConfirmationPopupService } from './../../../shared/confirmation-popup/confirmation-popup.service';
 import { Component, HostListener, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-
-import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTableModule } from '@angular/material/table';
-
-import { MatFormFieldModule } from '@angular/material/form-field';
-
-import { MatInputModule } from '@angular/material/input';
-import { MatSelect, MatOption } from '@angular/material/select';
-import { MatListModule } from '@angular/material/list';
-
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatGridListModule } from '@angular/material/grid-list';
-import { MatDialogModule, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { AdminDashboardService } from './admin-dashboard.service';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { AuthResponse } from '../../../core/auth.service';
+import { ClickOutsideDirective } from '../../../shared/directives/click-outside.directive';
+import { MaterialModule } from '../../../shared/modules/material.module';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 type User = AuthResponse['userInfo'];
+
+interface UserDialogData {
+  user: User;
+  isEditMode: boolean;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    MatTableModule,
-    MatCardModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelect,
-    MatOption,
-    MatListModule,
-    FormsModule,
-    MatAutocompleteModule,MatGridListModule,MatDialogModule,NgFor
+    MaterialModule,
+    NgFor,ClickOutsideDirective,ReactiveFormsModule
   ],
   templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.scss'
+  styleUrls: ['./admin-dashboard.component.scss'] // Fixed typo to use 'styleUrls' for array
 })
-export class AdminDashboardComponent implements OnInit{
-  activeMenuId : number = 0;
-  adminMenuGrid1: {menuName : string , menuId : number}[] =
-  [{menuName : 'User Management', menuId : 1},{menuName : 'Raise Request', menuId : 2}]
+export class AdminDashboardComponent implements OnInit {
+  activeMenuId: number = 0;
+  adminMenuGrid1 = [
+    { menuName: 'User Management', menuId: 1 },
+    { menuName: 'Raise Request', menuId: 2 },
+  ];
+  isNewUser :boolean =  false;
   searchText: string = '';
   searchResults: User[] = [];
   selectedUsers: User[] = [];
   private searchSubject = new Subject<string>();
-  @ViewChild('userPopup') userPopup!: TemplateRef<any>;
-   private dialogRef!: MatDialogRef<any>
 
-  users: any[] = [];
-  isEditMode : boolean = false;
+  @ViewChild('userPopup') userPopup!: TemplateRef<any>;
+  @ViewChild('passwordPopup') passwordPopup!: TemplateRef<any>;
+  private dialogRef!: MatDialogRef<UserDialogData>;
+
+  users: User[] = []; // Changed to a more specific User[] type
+  isEditMode: boolean = false;
   cols: number = 6;
-  selectedUserEditViewDelete : User ={
+  passwordForm!: FormGroup;
+  selectedUserToModify: User = {
     firstName: '',
-    role: 'string',
-    lastName: 'string',
-    userId: 'string',
-    email: 'string',
-  };;
-  constructor(private adminService: AdminDashboardService, private dialog : MatDialog) { }
+    role: '',
+    lastName: '',
+    userId: null,
+    email: '',
+  };
+  usersTableDataSource = new MatTableDataSource<User>(this.selectedUsers);
+
+  constructor(private fb: FormBuilder, private adminService: AdminDashboardService, private dialog: MatDialog,private confirmationPopupService: ConfirmationPopupService) {}
 
   ngOnInit(): void {
     this.setupSearch();
     this.adjustGrid();
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event : any) {
+  @HostListener('window:resize')
+  onResize() {
     this.adjustGrid();
   }
-
+  getCombinedUserInfo(user: any): string {
+    return `${user.firstName} ${user.lastName} (${user.email})`;
+  }
   adjustGrid() {
     const screenWidth = window.innerWidth;
-    if (screenWidth <= 600) { // Mobile
-      this.cols = 2;
-    } else if (screenWidth <= 960) { // Tablet
-      this.cols = 3;
-    } else { // Desktop
-      this.cols = 6;
+    if (screenWidth <= 600) {
+      this.cols = 2; // Mobile
+    } else if (screenWidth <= 960) {
+      this.cols = 3; // Tablet
+    } else {
+      this.cols = 6; // Desktop
     }
   }
+  openUserDialog(user: User) {
+    this.selectedUserToModify = { ...user }; // Clone the user data
 
-  onTileClick(item : any){
-    this.activeMenuId = item.menuId;
-    console.log(this.activeMenuId);
-
+    this.dialogRef = this.dialog.open(this.userPopup, {
+      data: { user: this.selectedUserToModify, isEditMode: this.isEditMode } as UserDialogData,
+    });
   }
+  openPasswordDialog(user: User){
+    this.selectedUserToModify = user;
+    this.passwordForm = this.fb.group({
+      newPassword: ['', [Validators.required, Validators.minLength(6)]], // Example: minimum length of 6
+    });
+    this.dialogRef = this.dialog.open(this.passwordPopup,{data:{user}});
+  }
+
+  onTileClick(item: { menuId: number }) {
+    this.activeMenuId = item.menuId;
+  }
+
   setupSearch(): void {
     this.searchSubject.pipe(
       debounceTime(300),
@@ -106,56 +112,57 @@ export class AdminDashboardComponent implements OnInit{
       }
     });
   }
+
   onSearchChange(searchValue: string): void {
     this.searchSubject.next(searchValue);
   }
-  removeUser(user:User, i :number){
-    this.selectedUsers = this.selectedUsers.filter(obj => obj.userId !== user.userId);
+
+  removeUser(user: User) {
+    this.selectedUsers = this.selectedUsers.filter(u => u.userId !== user.userId);
+    this.usersTableDataSource.data = this.selectedUsers;
   }
+
   performSearch(searchText: string): void {
     this.adminService.fetchUserList(searchText).subscribe({
       next: (response: User[]) => {
-        console.log(this.searchResults, response);
-// debugger;
         this.searchResults = response.filter(user =>
           !this.selectedUsers.some(selectedUser => selectedUser.userId === user.userId)
         );
-        console.log(this.searchResults);
-
       },
       error: (error) => {
         console.error('Error searching users:', error);
+        // Display user-friendly error message (e.g., using a snackbar)
       },
     });
   }
 
-  editUser(user: User, i : number) {
+  editUser(user: User) {
+    this.isNewUser = false;
     this.isEditMode = true;
-    this.selectedUserEditViewDelete = { ...user }; // Clone the user data to prevent changes
-    this.dialogRef = this.dialog.open(this.userPopup, {
-      data: { user: this.selectedUserEditViewDelete, isEditMode: this.isEditMode }
-    });
+    this.openUserDialog(user);
   }
 
-  viewUserDetails(user: User , i : number) {
+  viewUserDetails(user: User) {
     this.isEditMode = false;
-    this.selectedUserEditViewDelete = { ...user }; // Clone the user data to prevent changes
-    this.dialogRef = this.dialog.open(this.userPopup, {
-      data: { user: this.selectedUserEditViewDelete, isEditMode: this.isEditMode }
-    });
+    this.openUserDialog(user);
   }
 
+  closeSearchResults(){
+    this.searchText='';
+    this.searchResults = [];
+    this.searchSubject.next('');
+  }
   selectUser(user: User): void {
-    // debugger;
-    this.selectedUsers.push({...user});
+    this.selectedUsers.push({ ...user }); // Add user to selected list
     this.searchResults = this.searchResults.filter(u => u.userId !== user.userId);
     this.searchText = '';
   }
 
   fetchUserList(): void {
-    this.adminService.fetchUserList('').subscribe({
+    this.adminService.fetchUserList('↺').subscribe({
       next: (response) => {
-        this.users = response;
+        this.selectedUsers = response;
+        this.usersTableDataSource.data = this.selectedUsers;
       },
       error: (error) => {
         console.error('Error fetching user list:', error);
@@ -163,23 +170,115 @@ export class AdminDashboardComponent implements OnInit{
       }
     });
   }
+addUser():void{
+  this.isNewUser = true;
+  let newuser: User = {firstName: "",role: "",lastName: "",userId: null,email: "",};
+   this.isEditMode = true;
+  this.openUserDialog(newuser);
+}
+async deleteUser(user: User) {
+  // Show confirmation dialog and wait for the user's response
+  const proceed = await this.confirmationPopupService.openConfirmationDialog(
+    'Confirm Deletion',
+    `Are you sure you want to delete user ${user.firstName + " " + user.lastName}?`
+  );
 
-  saveUser(user: User) {
-    console.log('Saving user:', user);
-
+  if (proceed) {
+    this.adminService.deleteUser(user).subscribe({
+      next: (response) => {
+        if(response.status == "success"){
+          this.selectedUsers = this.selectedUsers.filter(u => u.userId !== user.userId);
+          this.usersTableDataSource.data = this.selectedUsers;
+        }
+        console.log('User deleted successfully:', response);
+      },
+      error: (err) => {
+        console.error('Error deleting user:', err);
+      },
+    });
+  } else {
+    console.log('User deletion cancelled.');
+  }
+}
+saveUser(user: User, newUser: boolean) {
+  if (newUser) {
+    this.adminService.addUser(user).subscribe({
+      next: (response) => {
+        // Update selectedUsers if userId matches
+        if (response.status === "success") {
+          this.selectedUsers.push(response.data);
+          this.usersTableDataSource.data = this.selectedUsers; // Add new user
+        }
+        if (this.dialogRef) {
+          this.dialogRef.close();
+          this.closeUserDialog();
+        }
+      },
+      error: (error) => {
+        console.error('Error adding user:', error);
+        // Show an error message to the user
+      }
+    });
+  } else {
     this.adminService.updateUser(user).subscribe({
       next: (response) => {
-        this.selectedUserEditViewDelete = response;
-        console.log('User updated successfully:', response);
+        // Update selectedUsers if userId matches
+        if (response.status === "success") {
+          const index = this.selectedUsers.findIndex(u => u.userId === user.userId);
+          if (index !== -1) {
+            // Create a new object for the updated user
+            this.selectedUsers[index] = { ...this.selectedUsers[index], ...user }; // Merge old and new user data
+            this.usersTableDataSource.data = this.selectedUsers;
+          }
+        }
         if (this.dialogRef) {
-          this.dialogRef.close(); // Close the specific dialog instance
+          this.dialogRef.close();
+          this.closeUserDialog();
         }
       },
       error: (error) => {
         console.error('Error updating user:', error);
+        // Show an error message to the user
       }
     });
-
   }
+}
 
+updatePassword() {
+  if (this.passwordForm.valid) {
+    const newPassword = this.passwordForm.get('newPassword')?.value;
+    const payload = {
+      userModel: this.selectedUserToModify, // User object that matches UserModel
+      password: newPassword                   // New password
+  };
+    this.adminService.updatePassword(payload).subscribe({
+      next: (response) => {
+        // Check the response status and handle accordingly
+        if (response.status === 'success') {
+          console.log('Password updated successfully:', response.message);
+          // Optionally, you can close the dialog or show a success message
+        } else if (response.status === 'error') {
+          console.error('Failed to update password:', response.message);
+          // Optionally, show an error message to the user
+        }
+      },
+      error: (err) => {
+        console.error('Error occurred while updating password:', err);
+        // Optionally, handle HTTP error response (e.g., show an error message)
+      }
+    });
+  } else {
+    console.warn('Form is invalid. Please check your inputs.');
+  }
+}
+
+  closeUserDialog() {
+    this.selectedUserToModify = {
+      firstName: '',
+      role: '',
+      lastName: '',
+      userId: null,
+      email: '',
+    };
+  }
 }

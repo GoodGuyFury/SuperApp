@@ -25,7 +25,7 @@ namespace MySuparApp.Controllers.Authentication
         [HttpPost("directlogin")]
         public async Task<IActionResult> DirectLogin([FromForm] string email, [FromForm] string password)
         {   
-            var result = new AuthenticationResult();
+            
             try
             {
                 // Validate the username and password using GetUserDetailsFromExcel method asynchronously
@@ -38,11 +38,10 @@ namespace MySuparApp.Controllers.Authentication
                     var jwt = await Task.Run(() => _authToken.GenerateToken(userData.UserId, userData.FirstName, userData.LastName,userData.Email, userData.Role));
 
                     // Append the JWT as an HttpOnly cookie (this can remain synchronous)
-                    _cookieHandler.AppendHttpOnlyCookie(HttpContext, "token-1", jwt);
+                    _cookieHandler.AppendHttpOnlyCookie(HttpContext, "auth-token", jwt);
 
-                    result.verificationResult.status = "authorized";
-                    result.verificationResult.message = "successful";
-                    result.userInfo = new UserModel
+                   
+                    var userInfo = new UserModel
                     {
                         UserId = userData.UserId,
                         FirstName = userData.FirstName,
@@ -52,20 +51,18 @@ namespace MySuparApp.Controllers.Authentication
                     };
 
                     // Return the AuthenticationResult model
-                    return Ok(result);
+                    return Ok(VerificationResultDto.CreateSuccess(userInfo,"Authentication successfull.")
+
+                    );
                 }
 
                 // If credentials are invalid, set error status and message
-                result.verificationResult.status = "error";
-                result.verificationResult.message = "Invalid username or password.";
-                return Unauthorized(result);
+                return Unauthorized(VerificationResultDto.CreateError("Invalid username or password."));
             }
             catch (Exception ex)
             {
                 // Handle unexpected errors
-                result.verificationResult.status = "error";
-                result.verificationResult.message = "An unexpected error occurred: " + ex.Message;
-                return StatusCode(500, result);
+                return StatusCode(500, VerificationResultDto.CreateError(ex.Message));
             }
         }
 
@@ -75,7 +72,7 @@ namespace MySuparApp.Controllers.Authentication
             if (Request.Headers.TryGetValue("googjwt", out var jwtHeaderValue))
             {
                 string jwt = jwtHeaderValue.ToString();
-                AuthenticationResult result = new AuthenticationResult();
+                var result = VerificationResultDto.CreateError();
 
                 try
                 {
@@ -87,46 +84,39 @@ namespace MySuparApp.Controllers.Authentication
 
                         if (userDetails != null)
                         {
-                            result.userInfo = userDetails;
-                            result.verificationResult.status = "authorized";
-                            result.verificationResult.message = "Successful";
+                            result = VerificationResultDto.CreateSuccess(userDetails);
+                            
                         }
                         else
                         {
-                            result.verificationResult.status = "unauthorized";
-                            result.verificationResult.message = "Authorization failed";
+                            result = VerificationResultDto.CreateError();
                         }
                     }
                     else
                     {
-                        result.verificationResult.status = "error";
-                        result.verificationResult.message = Id.msg;
+                        result = VerificationResultDto.CreateError(Id.msg);
                     }
                 }
                 catch (Exception ex)
                 {
-                    result.verificationResult.status = "error";
-                    result.verificationResult.message = ex.Message;
+                    result = VerificationResultDto.CreateError(ex.Message);
                 }
 
-                switch (result.verificationResult.status.ToLower())
+                switch (result.GetStatus())
                 {
                     case "authorized":
                         // Example: Set a cookie or handle the authorized user scenario
-                        _cookieHandler.AppendHttpOnlyCookie(HttpContext, "token-1", jwt);
-
+                        _cookieHandler.AppendHttpOnlyCookie(HttpContext, "auth-token", jwt);
                         return Ok(result);
                     case "unauthorized":
                         return Unauthorized(result);
-                    case "error":
-                        return StatusCode(500, "An error occurred during authentication.");
                     default:
                         return BadRequest("Unknown verification status.");
                 }
             }
             else
             {
-                return Unauthorized("Missing or invalid 'googjwt' header.");
+                return Unauthorized(VerificationResultDto.CreateError("Missing or invalid 'googjwt' header."));
             }
         }
 
