@@ -13,7 +13,7 @@ export class HeaderService {
 
   logout() { // Add logout method
     const logoutUrl = `${environment.apiUrl}/logout`; // Construct logout URL
-    this.http.get(logoutUrl, { responseType: 'text' }).subscribe({ // Call logout API with text response
+    this.http.get(logoutUrl, { responseType: 'json' }).subscribe({ // Call logout API with text response
       next: (response) => { // Handle successful response
         console.log('Logout response:', response); // Log the string response
         this.authService.clearAuthData(); // Call logout method from AuthService

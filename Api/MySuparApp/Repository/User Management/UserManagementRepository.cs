@@ -13,9 +13,9 @@ namespace MySuparApp.Repository.Admin
     public interface IUserManagement
     {
         Task<List<UserModel>> GetUsersAsync(string searchText);
-        Task<ResultStatusDto<UserModel>> UpdateUserAsync(UserModel user);
-        Task<ResultStatusDto<NewUserModel>> AddUserAsync(NewUserModel user);
-        Task<ResultStatusDto<UserModel>> DeleteUserAsync(UserModel user);
+        Task<ResultStatusDto<UserModel>> UpdateUserAsync(UserModel userUpdateRequest, UserModel requestingUser, bool isSelfUpdate);
+        Task<ResultStatusDto<NewUserModel>> AddUserAsync(NewUserModel newUser, UserModel? requestingUser = null);
+        Task<ResultStatusDto<UserModel>> DeleteUserAsync(UserModel userToRemove, UserModel requestingUser, bool isSelfDelete);
         Task<ResultStatusDto<UserModel>> SetPassword(UserModel user, string newPassword, string? oldPassword = null, string? otp = null);
     }
     public class UserManagement : IUserManagement
@@ -63,11 +63,15 @@ namespace MySuparApp.Repository.Admin
                 // Filter the user list based on the searchText
                 var lowerSearchText = searchText.ToLower(); // Convert the search text to lowercase
 
+                UserRole? roleEnum = Enum.TryParse(typeof(UserRole), searchText, true, out var parsedRole)
+                            ? (UserRole?)parsedRole
+                            : null;
+
                 query = query.Where(u =>
                     (u.FirstName != null && u.FirstName.ToLower().Contains(lowerSearchText)) ||
                     (u.LastName != null && u.LastName.ToLower().Contains(lowerSearchText)) ||
                     (u.Email != null && u.Email.ToLower().Contains(lowerSearchText)) ||
-                    (u.Role.ToString().ToLower() == lowerSearchText));
+                    (roleEnum != null && u.Role == roleEnum));
 
                 // Select only the necessary fields for UserModel (excluding UserInt)
                 return await query
@@ -89,113 +93,227 @@ namespace MySuparApp.Repository.Admin
         }
 
 
-        public async Task<ResultStatusDto<UserModel>> UpdateUserAsync(UserModel model)
+        public async Task<ResultStatusDto<UserModel>> UpdateUserAsync(UserModel userUpdateRequest, UserModel requestingUser, bool isSelfUpdate)
         {
             try
             {
-                if (model == null)
+                if (userUpdateRequest == null)
                 {
-                    throw new ArgumentNullException(nameof(model), "User model is null.");
+                    throw new ArgumentNullException(nameof(userUpdateRequest), "User model is null.");
                 }
-               
+
                 // Fetch the existing user from the database
-                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == model.UserId); ; // Assuming UserId is the primary key
-                if (existingUser == null)
+                var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userUpdateRequest.UserId);
+                if (dbUser == null)
                 {
                     return ResultStatusDto<UserModel>.CreateError("User not found.");
                 }
-                if (existingUser.Role == UserRole.SuperAdmin)
+
+                // If the current user is a regular user, ensure they can only update their own profile
+                if (requestingUser.UserId == dbUser.UserId && requestingUser.UserId == userUpdateRequest.UserId && isSelfUpdate)
                 {
-                    return ResultStatusDto<UserModel>.CreateError("user is a super admin");
+                    // Users can update their name, last name, and email but not role
+                    dbUser.FirstName = userUpdateRequest.FirstName;
+                    dbUser.LastName = userUpdateRequest.LastName;
+                    dbUser.Email = userUpdateRequest.Email;
+                    // Role remains unchanged for regular users
+                }
+                else if (requestingUser.Role == UserRole.Admin)
+                {
+
+                    if (dbUser.Role == UserRole.Admin || dbUser.Role == UserRole.SuperAdmin)
+                    {
+                        return ResultStatusDto<UserModel>.CreateError("Admins cannot change other Admin or SuperAdmin details.");
+                    }
+
+                    // Admins can update users, but can only assign roles up to 'User'
+                    if (userUpdateRequest.Role == UserRole.Admin || userUpdateRequest.Role == UserRole.SuperAdmin)
+                    {
+                        return ResultStatusDto<UserModel>.CreateError("Admins cannot assign Admin or SuperAdmin roles.");
+                    }
+
+                    // Admins can update other properties, including role up to 'User'
+                    dbUser.FirstName = userUpdateRequest.FirstName;
+                    dbUser.LastName = userUpdateRequest.LastName;
+                    dbUser.Email = userUpdateRequest.Email;
+                    dbUser.Role = userUpdateRequest.Role; // Role can be updated, but limited to 'User'
+                }
+                else if (requestingUser.Role == UserRole.SuperAdmin)
+                {
+
+                    if (userUpdateRequest.Role == UserRole.SuperAdmin)
+                    {
+                        return ResultStatusDto<UserModel>.CreateError("You cannot change other SuperAdmin details.");
+                    }
+
+                    // SuperAdmins can assign any role up to 'Admin'
+                    if (userUpdateRequest.Role == UserRole.SuperAdmin)
+                    {
+                        return ResultStatusDto<UserModel>.CreateError("You cannot assign SuperAdmin role.");
+                    }
+
+                    // SuperAdmins can update other properties, including role up to 'Admin'
+                    dbUser.FirstName = userUpdateRequest.FirstName;
+                    dbUser.LastName = userUpdateRequest.LastName;
+                    dbUser.Email = userUpdateRequest.Email;
+                    dbUser.Role = userUpdateRequest.Role; // Role can be updated, but limited to 'Admin'
+                }
+                else
+                {
+                    return ResultStatusDto<UserModel>.CreateError("Unauthorized operation.");
                 }
 
+                // Check if the email is already taken by another user
                 var emailExists = await _context.Users
-                .Where(u => u.Email == model.Email && u.UserId != model.UserId) // Ensure it is not the same user
-                .AnyAsync();
+                    .Where(u => u.Email == userUpdateRequest.Email && u.UserId != userUpdateRequest.UserId) // Ensure it is not the same user
+                    .AnyAsync();
 
                 if (emailExists)
                 {
                     return ResultStatusDto<UserModel>.CreateError("Email already exists for another user.");
                 }
-                // Update the existing user properties
-                existingUser.FirstName = model.FirstName;
-                existingUser.LastName = model.LastName;
-                existingUser.Email = model.Email;
-                existingUser.Role = model.Role;
-                // Update other properties as needed
 
-               
+                // Save changes to the database
                 await _context.SaveChangesAsync();
-                return ResultStatusDto<UserModel>.CreateSuccess("User Updated Successfully", model);
+                return ResultStatusDto<UserModel>.CreateSuccess("User updated successfully.", userUpdateRequest);
             }
             catch (Exception ex)
             {
-                // Log the exception
+                // Log the exception and return an error response
                 return ResultStatusDto<UserModel>.CreateError(ex.Message.ToString());
             }
         }
-        
-        public async Task<ResultStatusDto<NewUserModel>> AddUserAsync(NewUserModel model)
+
+
+        public async Task<ResultStatusDto<NewUserModel>> AddUserAsync(NewUserModel newUser, UserModel? requestingUser = null)
         {
-            try {
-                if (model == null) {
-                    return ResultStatusDto<NewUserModel>.CreateError("user is empty");
-                }
-                var isExististingUser = await _context.Users.AnyAsync(u => u.Email == model.Email);
-
-                if (isExististingUser) {
-                    return ResultStatusDto<NewUserModel>.CreateError("User Mail already present in db");
-                }
-
-                var newUser = _mapper.Map<EntityUserModel>(model);
-                newUser.UserId = await GenerateUniqueUserIdAsync();
-
-                model.UserId = newUser.UserId;
-               await _context.Users.AddAsync(newUser);
-                await _context.SaveChangesAsync();
-
-                return ResultStatusDto<NewUserModel>.CreateSuccess("User Created Successfully",model);
-            }
-            catch (Exception ex) {
-
-                return ResultStatusDto<NewUserModel>.CreateError(ex.Message.ToString());
-            }
-        }
-
-        public async Task<ResultStatusDto<UserModel>> DeleteUserAsync(UserModel model)
-        {
-            
-            try { 
-                if (model == null) {
-
-                    var result = ResultStatusDto<UserModel>.CreateError("No user Found");
-
-                    return result;
-                }
-                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == model.UserId);
-                if (existingUser != null) { 
-                if(existingUser.Role == UserRole.SuperAdmin || existingUser.Role == UserRole.Admin)
-                    {
-                        var result = ResultStatusDto<UserModel>.CreateError("Admin and super admin cannot be deleted");
-                        return result;
-                    }else
-                    {
-                        _context.Users.Remove(existingUser);
-                        await _context.SaveChangesAsync();
-                        var result = ResultStatusDto<UserModel>.CreateSuccess("Deleted successfully");
-                        return result;
-                    }
-                } else
+            try
+            {
+                if (newUser == null)
                 {
-                    var result = ResultStatusDto<UserModel>.CreateError("user doesnt exist");
-                    return result;
+                    return ResultStatusDto<NewUserModel>.CreateError("User is empty.");
                 }
+
+                // Check if the email is already in use
+                var dbUser = await _context.Users.AnyAsync(u => u.Email == newUser.Email);
+                if (dbUser)
+                {
+                    return ResultStatusDto<NewUserModel>.CreateError("User email already exists in the database.");
+                }
+
+                // If there's no current user, it's a self-signup
+                if (requestingUser == null)
+                {
+                    // Self-signup is only allowed for User or Guest roles
+                    if (newUser.Role != UserRole.User && newUser.Role != UserRole.Guest)
+                    {
+                        return ResultStatusDto<NewUserModel>.CreateError("You can only sign up as a User or Guest.");
+                    }
+                }
+                else
+                {
+                    // If current user is an Admin or SuperAdmin trying to add another user
+                    if (requestingUser.Role == UserRole.Admin)
+                    {
+                        // Admins can add users up to Admin role
+                        if (newUser.Role == UserRole.SuperAdmin || newUser.Role == UserRole.Admin)
+                        {
+                            return ResultStatusDto<NewUserModel>.CreateError("Admins cannot create Admins or SuperAdmins.");
+                        }
+                    }
+                    else if (requestingUser.Role == UserRole.SuperAdmin)
+                    {
+                        if (newUser.Role == UserRole.SuperAdmin)
+                        {
+                            return ResultStatusDto<NewUserModel>.CreateError("SuperAdmin cannot create other SuperAdmins.");
+                        }
+                    }
+                    else
+                    {
+                        // Other roles are not authorized to add users
+                        return ResultStatusDto<NewUserModel>.CreateError("You are not authorized to add users.");
+                    }
+                }
+
+                // Proceed to create the new user
+                var mappedUser = _mapper.Map<EntityUserModel>(newUser);
+                mappedUser.UserId = await GenerateUniqueUserIdAsync(); // Generate unique ID
+
+                newUser.UserId = mappedUser.UserId; // Assign the generated ID to the model
+
+                await _context.Users.AddAsync(mappedUser);
+                await _context.SaveChangesAsync();
+
+                return ResultStatusDto<NewUserModel>.CreateSuccess("User created successfully.", newUser);
             }
             catch (Exception ex)
             {
-                return ResultStatusDto<UserModel>.CreateError(ex.Message.ToString());
+                // Handle any exception and return an error response
+                return ResultStatusDto<NewUserModel>.CreateError(ex.Message);
             }
         }
+
+
+        public async Task<ResultStatusDto<UserModel>> DeleteUserAsync(UserModel userToRemove, UserModel requestingUser, bool isSelfDelete)
+        {
+            try
+            {
+                // Check if the user to be deleted exists
+                var dbUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userToRemove.UserId);
+
+                if (dbUser == null)
+                {
+                    return ResultStatusDto<UserModel>.CreateError("User does not exist.");
+                }
+
+                // If the current user is deleting themselves, allow it without further checks
+                if ((requestingUser.UserId == userToRemove.UserId) && isSelfDelete)
+                {
+                    // Proceed to delete the user
+                    _context.Users.Remove(dbUser);
+                    await _context.SaveChangesAsync();
+                    return ResultStatusDto<UserModel>.CreateSuccess("Your account has been deleted.");
+                }
+                if ((requestingUser.UserId == userToRemove.UserId) && !isSelfDelete)
+                {
+                    return ResultStatusDto<UserModel>.CreateError("You cannot delete your own account from here.");
+                }
+                // Role-based deletion checks for when current user is deleting someone else
+                if (requestingUser.Role == UserRole.SuperAdmin)
+                {
+                    if (dbUser.Role == UserRole.SuperAdmin)
+                    {
+                        return ResultStatusDto<UserModel>.CreateError("SuperAdmin cannot delete other SuperAdmins.");
+                    }
+                }
+                else if (requestingUser.Role == UserRole.Admin)
+                {
+                    // Admin can delete anyone except Admins and SuperAdmins
+                    if (dbUser.Role == UserRole.Admin || dbUser.Role == UserRole.SuperAdmin)
+                    {
+                        return ResultStatusDto<UserModel>.CreateError("Admins cannot delete other Admins or SuperAdmins.");
+                    }
+                }
+                else
+                {
+                    // If the current user is neither SuperAdmin nor Admin
+                    return ResultStatusDto<UserModel>.CreateError("You are not authorized to delete users.");
+                }
+
+                // Proceed to delete the user
+                _context.Users.Remove(dbUser);
+                await _context.SaveChangesAsync();
+
+                return ResultStatusDto<UserModel>.CreateSuccess("User deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Handle any exception and return an error response
+                return ResultStatusDto<UserModel>.CreateError(ex.Message);
+            }
+        }
+
+
 
         public async Task<ResultStatusDto<UserModel>> SetPassword(UserModel model, string newPassword, string? oldPassword = null, string? otp = null)
         {

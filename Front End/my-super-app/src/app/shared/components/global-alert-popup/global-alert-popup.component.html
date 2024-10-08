@@ -1,0 +1,9 @@
+<mat-card style="background-color: aliceblue;">
+  <h1 mat-dialog-title class="dialog-title">{{type == "success" ? "Successfull" : "Error"}}</h1> <!-- Title -->
+  <button mat-icon-button class="close-button" (click)="close()" aria-label="Close">
+    <mat-icon>close</mat-icon> <!-- Close Icon -->
+  </button>
+  <mat-card-content>
+    <p class="dialog-message">{{ message }}</p> <!-- Message -->
+  </mat-card-content>
+</mat-card>

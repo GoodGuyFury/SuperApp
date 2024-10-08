@@ -1,4 +1,5 @@
-import { ConfirmationPopupService } from './../../../shared/confirmation-popup/confirmation-popup.service';
+import { GlobalAlertPopupService } from './../../../shared/components/global-alert-popup/global-alert-popup.service';
+import { ConfirmationPopupService } from '../../../shared/components/confirmation-popup/confirmation-popup.service';
 import { Component, HostListener, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { MatTableDataSource } from '@angular/material/table';
@@ -57,7 +58,7 @@ export class AdminDashboardComponent implements OnInit {
   };
   usersTableDataSource = new MatTableDataSource<User>(this.selectedUsers);
 
-  constructor(private fb: FormBuilder, private adminService: AdminDashboardService, private dialog: MatDialog,private confirmationPopupService: ConfirmationPopupService) {}
+  constructor(private fb: FormBuilder, private adminService: AdminDashboardService, private dialog: MatDialog,private confirmationPopupService: ConfirmationPopupService, private globalAlertPopupService : GlobalAlertPopupService) {}
 
   ngOnInit(): void {
     this.setupSearch();
@@ -154,6 +155,7 @@ export class AdminDashboardComponent implements OnInit {
   }
   selectUser(user: User): void {
     this.selectedUsers.push({ ...user }); // Add user to selected list
+    this.usersTableDataSource.data = this.selectedUsers;
     this.searchResults = this.searchResults.filter(u => u.userId !== user.userId);
     this.searchText = '';
   }
@@ -186,29 +188,33 @@ async deleteUser(user: User) {
   if (proceed) {
     this.adminService.deleteUser(user).subscribe({
       next: (response) => {
+
+        this.globalAlertPopupService.showAlert(response.message, response.status);
+
         if(response.status == "success"){
           this.selectedUsers = this.selectedUsers.filter(u => u.userId !== user.userId);
           this.usersTableDataSource.data = this.selectedUsers;
         }
-        console.log('User deleted successfully:', response);
       },
       error: (err) => {
-        console.error('Error deleting user:', err);
+        this.globalAlertPopupService.showAlert(err, 'error');
       },
     });
   } else {
-    console.log('User deletion cancelled.');
+    this.globalAlertPopupService.showAlert('User deletion cancelled.', 'error');
   }
 }
 saveUser(user: User, newUser: boolean) {
   if (newUser) {
     this.adminService.addUser(user).subscribe({
       next: (response) => {
+        this.globalAlertPopupService.showAlert(response.message, response.status);
         // Update selectedUsers if userId matches
         if (response.status === "success") {
           this.selectedUsers.push(response.data);
           this.usersTableDataSource.data = this.selectedUsers; // Add new user
         }
+
         if (this.dialogRef) {
           this.dialogRef.close();
           this.closeUserDialog();
@@ -222,6 +228,9 @@ saveUser(user: User, newUser: boolean) {
   } else {
     this.adminService.updateUser(user).subscribe({
       next: (response) => {
+
+        this.globalAlertPopupService.showAlert(response.message, response.status);
+
         // Update selectedUsers if userId matches
         if (response.status === "success") {
           const index = this.selectedUsers.findIndex(u => u.userId === user.userId);

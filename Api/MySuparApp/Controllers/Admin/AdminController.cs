@@ -40,12 +40,20 @@ namespace MySuparApp.Controllers.Admin
                 return StatusCode(500, ResultStatusDto<UserModel>.CreateError(ex.Message));
             }
         }
+
         [HttpPost("updateuser")]
-        public async Task<IActionResult> UpdateUserAsync([FromBody] UserModel user)
+        public async Task<IActionResult> UpdateUserAsync([FromBody] UserModel userUpdateRequest)
         {
             try
             {
-                var result = await _usermanagement.UpdateUserAsync(user);
+                var requestingUser = _currentUserService.GetCurrentUser();
+
+                if (requestingUser == null)
+                {
+                    return Unauthorized(ResultStatusDto<UserModel>.CreateError("User needs to be authorized")); // User must be authenticated
+                }
+
+                var result = await _usermanagement.UpdateUserAsync(userUpdateRequest, requestingUser, false);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -53,13 +61,14 @@ namespace MySuparApp.Controllers.Admin
                 return StatusCode(500, ResultStatusDto<UserModel>.CreateError(ex.Message));
             }
         }
+
         [HttpPost("adduser")]
-        public async Task<IActionResult> AddUserAsync([FromBody] NewUserModel user)
+        public async Task<IActionResult> AddUserAsync([FromBody] NewUserModel newUser)
         {
             try
-            {
-                var result = await _usermanagement.AddUserAsync(user);
-                return Ok(ResultStatusDto<NewUserModel>.CreateSuccess("User created successfully", user));
+            {   var requestingUser = _currentUserService.GetCurrentUser(); 
+                var result = await _usermanagement.AddUserAsync(newUser, requestingUser);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -67,39 +76,33 @@ namespace MySuparApp.Controllers.Admin
                 return StatusCode(500, ResultStatusDto<object>.CreateError(ex.Message));
             }
         }
+
         [HttpPost("deleteuser")]
-        public async Task<IActionResult> DeleteUserAsync([FromBody] UserModel? user = null)
+        public async Task<IActionResult> DeleteUserAsync([FromBody] UserModel? userToRemove = null)
         {
             try {
-                var currentUser = _currentUserService.GetCurrentUser();
+                var requestingUser = _currentUserService.GetCurrentUser();
 
-                if (currentUser == null)
+                if (requestingUser == null)
                 {
                     return Unauthorized(ResultStatusDto<UserModel>.CreateError("User needs to be authorized")); // User must be authenticated
                 }
 
                 // Check if the current user is an admin or super admin
-                bool isAdminOrSuperAdmin = currentUser.Role == UserRole.Admin || currentUser.Role == UserRole.SuperAdmin;
+                bool isAdminOrSuperAdmin = requestingUser.Role == UserRole.Admin || requestingUser.Role == UserRole.SuperAdmin;
 
                 // If the current user is not an admin or super admin
                 if (!isAdminOrSuperAdmin)
                 {
-                    // If the user parameter is provided, deny the request
-                    if (user != null)
-                    {
-                        return Forbid(); // Only admins can delete other users
-                    }
-
-                    // Allow the user to delete themselves
-                    user = currentUser;
+                  return Forbid(); // Only admins can delete other users                   
                 }
 
-                if (user == null)
+                if (userToRemove == null)
                 {
                     return BadRequest(ResultStatusDto<object>.CreateError("User is required for deletion"));
                 }
 
-                var result = await _usermanagement.DeleteUserAsync(user);
+                var result = await _usermanagement.DeleteUserAsync(userToRemove, requestingUser, false);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -119,7 +122,7 @@ namespace MySuparApp.Controllers.Admin
                 }
 
                 var result = await _usermanagement.SetPassword(updatePassModel.userModel, updatePassModel.password);
-                return Ok(ResultStatusDto<UserModel>.CreateSuccess("Password succesfully updated"));
+                return Ok(result);
             }
             catch(Exception ex) 
             {

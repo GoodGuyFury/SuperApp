@@ -67,7 +67,7 @@ namespace MySuparApp.Shared
                 {
                     if (string.IsNullOrEmpty(currentUser.UserId) || string.IsNullOrEmpty(currentUser.Email) || string.IsNullOrEmpty(currentUser.FirstName))
                     {
-                        await HandleUnauthorizedAsync(context, "Use missing key details like UserId / email / First Name");
+                        await HandleUnauthorizedAsync(context, "User missing key details like UserId / email / First Name");
                         return;
                     }
                     context.Items["UserData"] = currentUser;
